@@ -143,18 +143,10 @@
           <div class="flex items-center justify-between mb-4">
             <h3 class="font-bold flex items-center gap-2">
               <svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg> 
-              Database Firebase
+              Database Firebase - Auto Deduplicate
             </h3>
             <button onclick="closeSettings()" class="btn btn-ghost"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
           </div>
-          
-          <div class="mb-4 p-3 rounded-lg" style="background: var(--accent-dim); border: 1px solid rgba(250,204,21,0.2);">
-            <p class="text-xs text-yellow-400 font-medium flex items-center gap-2">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-              <span>Deduplikasi Aktif: Data akan ditimpa berdasarkan PART NUMBER yang sama</span>
-            </p>
-          </div>
-          
           <div class="mb-4">
             <label class="block text-sm text-gray-400 mb-2">Status Database</label>
             <div class="flex flex-wrap gap-2">
@@ -164,13 +156,13 @@
               </button>
               <button onclick="syncToFirebase()" class="btn btn-primary text-sm flex-1 min-w-[120px]" id="btnSyncToFirebase">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg> 
-                Upload ke Firebase
+                Upload (Overwrite)
               </button>
               <button onclick="resetFisikData()" class="btn btn-danger text-sm flex-1 min-w-[120px]" id="btnResetFisik">
                 Reset Fisik & Selisih
               </button>
-              <button onclick="cleanDuplicates()" class="btn btn-warning text-sm flex-1 min-w-[120px]" style="background: rgba(249,115,22,0.1); color: var(--warning); border: 1px solid rgba(249,115,22,0.3);">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+              <button onclick="deduplicateDatabase()" class="btn btn-success text-sm flex-1 min-w-[120px]">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                 Bersihkan Duplikat
               </button>
             </div>
@@ -178,7 +170,8 @@
           <div class="text-xs text-gray-600 flex items-center gap-2 flex-wrap">
             <span id="dbStatusText">Firebase Firestore</span>
             <span class="realtime-badge"><span class="pulse-dot"></span> Realtime Sync Aktif</span>
-            <span class="dedup-badge">🔄 Deduplikasi: ON</span>
+            <span class="dedup-badge">🔄 Data unik berdasarkan PART</span>
+            <span class="text-gray-500" id="totalDocsText">Total dokumen: 0</span>
           </div>
         </div>
       </div>
@@ -198,7 +191,7 @@
               <svg class="w-8 h-8 mx-auto mb-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
               <p class="text-sm text-gray-400">Drop Excel file atau klik untuk upload</p>
               <p class="text-xs text-gray-600 mt-1">Format: NO, PART, DESKRIPSI PART, QTY, QTY ALLOC</p>
-              <p class="text-xs text-yellow-400 mt-1">⚠️ Data akan ditimpa berdasarkan PART Number yang sama</p>
+              <p class="text-xs text-yellow-400 mt-1">⚠️ Data akan otomatis overwrite berdasarkan PART</p>
             </label>
           </div>
           <div class="flex flex-wrap gap-2">
@@ -256,12 +249,12 @@
         <div class="flex items-start gap-3">
           <svg class="w-5 h-5 text-yellow-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           <div class="text-sm">
-            <p class="text-yellow-400 font-medium mb-1">Info Realtime & Deduplikasi</p>
+            <p class="text-yellow-400 font-medium mb-1">Sistem Anti-Duplikat & Overwrite Otomatis</p>
             <ol class="text-gray-400 space-y-1 list-decimal list-inside">
-              <li>Data tersinkron <strong>REALTIME</strong> dengan Firebase - semua perubahan langsung terlihat</li>
-              <li><strong>DEDUPLIKASI OTOMATIS:</strong> Data dengan PART Number yang sama akan ditimpa dengan data terbaru</li>
-              <li>Upload Excel atau data dari Firebase otomatis tersimpan di cloud tanpa duplikat</li>
-              <li>Setiap scan barcode atau edit, data langsung terupdate di semua perangkat</li>
+              <li><strong>🔄 NO DUPLICATE:</strong> Setiap PART hanya memiliki 1 data di Firebase</li>
+              <li><strong>📝 AUTO OVERWRITE:</strong> Data lama akan <strong>DITIMPA</strong> dengan data baru berdasarkan PART</li>
+              <li><strong>⚡ REALTIME:</strong> Semua perubahan langsung terlihat di semua perangkat</li>
+              <li><strong>🧹 CLEANUP:</strong> Tombol "Bersihkan Duplikat" untuk menghapus data duplikat</li>
             </ol>
           </div>
         </div>
@@ -406,6 +399,7 @@
     let isLoading = false;
     let unsubscribeListener = null;
     let isInitialLoad = true;
+    let isProcessingUpdate = false;
     
     document.addEventListener('DOMContentLoaded', () => { 
       checkLoginStatus();
@@ -467,7 +461,189 @@
     }
 
     // =============================================
-    // REALTIME FIRESTORE LISTENER WITH DEDUPLICATION
+    // DEDUPLICATION & OVERWRITE SYSTEM
+    // =============================================
+    
+    /**
+     * Generate a unique key based on PART number
+     * This ensures each PART has only one document
+     */
+    function getPartKey(part) {
+      return part.trim().toUpperCase();
+    }
+
+    /**
+     * Find document ID by PART number
+     */
+    async function findDocIdByPart(part) {
+      try {
+        const partKey = getPartKey(part);
+        const snapshot = await db.collection(COLLECTION_NAME)
+          .where('partKey', '==', partKey)
+          .limit(1)
+          .get();
+        
+        if (!snapshot.empty) {
+          return snapshot.docs[0].id;
+        }
+        return null;
+      } catch (e) {
+        console.error('Error finding doc by part:', e);
+        return null;
+      }
+    }
+
+    /**
+     * Save or update item with deduplication (OVERWRITE based on PART)
+     */
+    async function saveItemWithDedup(item) {
+      if (!item.part) return null;
+      
+      try {
+        const partKey = getPartKey(item.part);
+        const existingDocId = await findDocIdByPart(item.part);
+        
+        const data = {
+          no: item.no || 0,
+          part: item.part.trim(),
+          partKey: partKey,
+          deskripsi: item.deskripsi || '',
+          qty: item.qty || 0,
+          qtyAlloc: item.qtyAlloc || 0,
+          fisik: item.fisik !== undefined && item.fisik !== null ? item.fisik : null,
+          selisih: item.selisih !== undefined && item.selisih !== null ? item.selisih : null,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
+        let docRef;
+        if (existingDocId) {
+          // OVERWRITE existing document
+          docRef = db.collection(COLLECTION_NAME).doc(existingDocId);
+          await docRef.update(data);
+          return { id: existingDocId, action: 'updated' };
+        } else {
+          // Create new document
+          docRef = await db.collection(COLLECTION_NAME).add(data);
+          return { id: docRef.id, action: 'created' };
+        }
+      } catch (e) {
+        console.error('Error saving item:', e);
+        return null;
+      }
+    }
+
+    /**
+     * Batch save multiple items with deduplication
+     */
+    async function batchSaveWithDedup(items) {
+      if (!items || !items.length) return { success: 0, failed: 0, duplicates: 0 };
+      
+      let success = 0, failed = 0, duplicates = 0;
+      const processedParts = new Set();
+      
+      for (const item of items) {
+        if (!item.part) continue;
+        
+        const partKey = getPartKey(item.part);
+        
+        // Skip if same part already processed in this batch
+        if (processedParts.has(partKey)) {
+          duplicates++;
+          continue;
+        }
+        processedParts.add(partKey);
+        
+        try {
+          const result = await saveItemWithDedup(item);
+          if (result) {
+            success++;
+            // Update local data with ID
+            const existingIdx = stockData.findIndex(d => 
+              d.part && getPartKey(d.part) === partKey
+            );
+            if (existingIdx !== -1) {
+              stockData[existingIdx].id = result.id;
+            }
+          } else {
+            failed++;
+          }
+        } catch (e) {
+          console.error('Batch save error:', e);
+          failed++;
+        }
+      }
+      
+      return { success, failed, duplicates };
+    }
+
+    /**
+     * Clean up duplicate documents in Firebase
+     * Keep only the latest document for each PART
+     */
+    async function deduplicateDatabase() {
+      if (!confirm('Ini akan menghapus data duplikat di Firebase. Lanjutkan?')) return;
+      
+      showToast('Memeriksa duplikat...', 'info');
+      updateConnectionStatus('loading', 'Membersihkan duplikat...');
+      
+      try {
+        // Get all documents
+        const snapshot = await db.collection(COLLECTION_NAME).get();
+        const docMap = new Map();
+        const duplicates = [];
+        
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const part = data.part;
+          if (!part) return;
+          
+          const key = getPartKey(part);
+          if (!docMap.has(key)) {
+            docMap.set(key, { docId: doc.id, data: data, timestamp: doc.data().updatedAt || 0 });
+          } else {
+            // This is a duplicate
+            duplicates.push({ docId: doc.id, part: part, key: key });
+          }
+        });
+        
+        if (duplicates.length === 0) {
+          showToast('Tidak ada data duplikat ditemukan! ✅', 'success');
+          updateConnectionStatus('connected', 'Terhubung — Semua data unik');
+          return;
+        }
+        
+        // Confirm deletion
+        if (!confirm(`Ditemukan ${duplicates.length} data duplikat. Hapus?`)) return;
+        
+        // Delete duplicates
+        let deleted = 0;
+        for (const dup of duplicates) {
+          try {
+            await db.collection(COLLECTION_NAME).doc(dup.docId).delete();
+            deleted++;
+          } catch (e) {
+            console.error('Error deleting duplicate:', e);
+          }
+        }
+        
+        showToast(`Berhasil menghapus ${deleted} data duplikat! 🧹`, 'success');
+        updateConnectionStatus('connected', `Terhubung — ${snapshot.size - deleted} items (unik)`);
+        
+        // Refresh data
+        if (unsubscribeListener) {
+          unsubscribeListener();
+          startRealtimeListener();
+        }
+        
+      } catch (e) {
+        console.error('Deduplication error:', e);
+        showToast('Error: ' + e.message, 'error');
+        updateConnectionStatus('disconnected', 'Gagal membersihkan duplikat');
+      }
+    }
+
+    // =============================================
+    // REALTIME FIRESTORE LISTENER
     // =============================================
     function startRealtimeListener() {
       if (unsubscribeListener) {
@@ -478,10 +654,11 @@
       updateConnectionStatus('loading', 'Menyambungkan realtime...');
       
       try {
-        // Listen for realtime changes
         unsubscribeListener = db.collection(COLLECTION_NAME)
           .orderBy('no', 'asc')
           .onSnapshot((snapshot) => {
+            if (isProcessingUpdate) return;
+            
             if (snapshot.empty && isInitialLoad) {
               stockData = [];
               filteredData = [];
@@ -489,49 +666,51 @@
               updateStats();
               updateButtons(false);
               updateConnectionStatus('connected', 'Terhubung — 0 items');
+              document.getElementById('totalDocsText').textContent = 'Total dokumen: 0';
               isInitialLoad = false;
               return;
             }
 
             isInitialLoad = false;
             
-            // Process snapshot with deduplication
-            const docMap = new Map();
-            const changedDocs = [];
+            // Build a map of current data
+            const newDataMap = new Map();
+            const changeTypes = {
+              added: 0,
+              modified: 0,
+              removed: 0
+            };
             
             snapshot.docChanges().forEach(change => {
               const doc = change.doc;
               const data = doc.data();
+              
+              // Skip if no part
+              if (!data.part) return;
+              
               const item = {
                 id: doc.id,
                 no: data.no || 0,
-                part: data.part || '',
+                part: data.part.trim(),
                 deskripsi: data.deskripsi || '',
                 qty: data.qty || 0,
                 qtyAlloc: data.qtyAlloc || 0,
                 available: (data.qty || 0) - (data.qtyAlloc || 0),
                 fisik: data.fisik !== undefined && data.fisik !== null ? data.fisik : null,
-                selisih: data.selisih !== undefined && data.selisih !== null ? data.selisih : null
+                selisih: data.selisih !== undefined && data.selisih !== null ? data.selisih : null,
+                partKey: data.partKey || getPartKey(data.part)
               };
               
-              // Store by part number for deduplication
-              const key = item.part.toLowerCase().trim();
+              const key = getPartKey(data.part);
+              newDataMap.set(key, item);
               
-              if (change.type === 'removed') {
-                // Remove from map
-                docMap.delete(key);
-              } else {
-                // Add or update - the latest one wins
-                docMap.set(key, item);
-              }
-              
-              changedDocs.push({ type: change.type, item });
+              if (change.type === 'added') changeTypes.added++;
+              else if (change.type === 'modified') changeTypes.modified++;
+              else if (change.type === 'removed') changeTypes.removed++;
             });
-
-            // Rebuild stockData from map (deduplicated)
-            stockData = Array.from(docMap.values());
             
-            // Sort by 'no'
+            // Update stockData from map (ensures uniqueness)
+            stockData = Array.from(newDataMap.values());
             stockData.sort((a, b) => a.no - b.no);
             
             // Update filtered data and UI
@@ -539,23 +718,18 @@
             renderTable();
             updateStats();
             updateButtons(stockData.length > 0);
-            updateConnectionStatus('connected', `Terhubung — ${stockData.length} items (Realtime)`);
+            document.getElementById('totalDocsText').textContent = `Total dokumen: ${stockData.length}`;
             
-            // Show toast for changes
-            if (changedDocs.length > 0 && !isInitialLoad) {
-              const added = changedDocs.filter(c => c.type === 'added').length;
-              const modified = changedDocs.filter(c => c.type === 'modified').length;
-              const removed = changedDocs.filter(c => c.type === 'removed').length;
-              
-              if (added > 0 || modified > 0 || removed > 0) {
-                let msg = 'Data diperbarui secara realtime';
-                if (added > 0) msg += ` (${added} baru)`;
-                if (modified > 0) msg += ` (${modified} diubah)`;
-                if (removed > 0) msg += ` (${removed} dihapus)`;
-                showToast(msg, 'success');
-              }
+            const totalChanges = changeTypes.added + changeTypes.modified + changeTypes.removed;
+            if (totalChanges > 0 && !isInitialLoad) {
+              let msg = 'Data diperbarui secara realtime';
+              if (changeTypes.added > 0) msg += ` (+${changeTypes.added})`;
+              if (changeTypes.modified > 0) msg += ` (✏️${changeTypes.modified})`;
+              if (changeTypes.removed > 0) msg += ` (🗑️${changeTypes.removed})`;
+              showToast(msg, 'success');
             }
             
+            updateConnectionStatus('connected', `Terhubung — ${stockData.length} items (Realtime)`);
             isFirebaseConnected = true;
             
           }, (error) => {
@@ -568,216 +742,6 @@
       } catch (e) {
         console.error('Error starting listener:', e);
         updateConnectionStatus('disconnected', 'Gagal memulai realtime');
-      }
-    }
-
-    // =============================================
-    // DEDUPLICATION HELPER FUNCTIONS
-    // =============================================
-    async function saveItemWithDeduplication(item) {
-      if (!item.part) {
-        showToast('Part Number tidak boleh kosong', 'error');
-        return false;
-      }
-
-      try {
-        // Search for existing document with same PART
-        const querySnapshot = await db.collection(COLLECTION_NAME)
-          .where('part', '==', item.part)
-          .get();
-
-        const data = {
-          no: item.no || 0,
-          part: item.part,
-          deskripsi: item.deskripsi || '',
-          qty: item.qty || 0,
-          qtyAlloc: item.qtyAlloc || 0,
-          fisik: item.fisik !== undefined ? item.fisik : null,
-          selisih: item.selisih !== undefined ? item.selisih : null
-        };
-
-        if (!querySnapshot.empty) {
-          // Update existing document
-          const docId = querySnapshot.docs[0].id;
-          await db.collection(COLLECTION_NAME).doc(docId).set(data, { merge: true });
-          item.id = docId;
-          showToast(`Data "${item.part}" diperbarui (ditimpa)`, 'info');
-        } else {
-          // Create new document
-          const docRef = await db.collection(COLLECTION_NAME).add(data);
-          item.id = docRef.id;
-          showToast(`Data "${item.part}" baru ditambahkan`, 'success');
-        }
-        return true;
-      } catch (e) {
-        console.error('Save error:', e);
-        showToast('Gagal menyimpan data: ' + e.message, 'error');
-        return false;
-      }
-    }
-
-    async function syncToFirebase() {
-      if (!stockData.length) { 
-        showToast('Tidak ada data untuk diupload', 'info'); 
-        return; 
-      }
-      if (!confirm('Upload semua data ke Firebase? Data dengan PART yang sama akan ditimpa.')) return;
-      
-      showToast('Mengupload ke Firebase (deduplikasi aktif)...', 'info');
-      let success = 0, failed = 0, updated = 0, added = 0;
-      
-      for (const item of stockData) {
-        try {
-          // Check if PART already exists
-          const querySnapshot = await db.collection(COLLECTION_NAME)
-            .where('part', '==', item.part)
-            .get();
-
-          const data = {
-            no: item.no,
-            part: item.part,
-            deskripsi: item.deskripsi,
-            qty: item.qty,
-            qtyAlloc: item.qtyAlloc,
-            fisik: item.fisik !== undefined ? item.fisik : null,
-            selisih: item.selisih !== undefined ? item.selisih : null
-          };
-
-          if (!querySnapshot.empty) {
-            // Update existing
-            const docId = querySnapshot.docs[0].id;
-            await db.collection(COLLECTION_NAME).doc(docId).set(data, { merge: true });
-            item.id = docId;
-            updated++;
-          } else {
-            // Create new
-            const docRef = await db.collection(COLLECTION_NAME).add(data);
-            item.id = docRef.id;
-            added++;
-          }
-          success++;
-        } catch (e) {
-          console.error('Upload error for item:', item.part, e);
-          failed++;
-        }
-      }
-      
-      showToast(`Upload selesai: ${success} berhasil (${added} baru, ${updated} ditimpa), ${failed} gagal`, 
-        failed === 0 ? 'success' : 'error');
-    }
-
-    async function resetFisikData() {
-      if (!stockData.length) { showToast('Tidak ada data', 'info'); return; }
-      if (!confirm('Reset FISIK & SELISIH di Firebase?')) return;
-      
-      showToast('Merreset data...', 'info');
-      let success = 0, failed = 0;
-      
-      for (const item of stockData) {
-        if (!item.id) continue;
-        try {
-          await db.collection(COLLECTION_NAME).doc(item.id).update({
-            fisik: null,
-            selisih: null
-          });
-          success++;
-        } catch (e) {
-          failed++;
-        }
-      }
-      
-      showToast(`Reset: ${success} berhasil, ${failed} gagal`, success > 0 ? 'success' : 'error');
-    }
-
-    async function cleanDuplicates() {
-      if (!stockData.length) { showToast('Tidak ada data', 'info'); return; }
-      if (!confirm('Bersihkan data duplikat di Firebase? Data dengan PART yang sama akan digabung.')) return;
-      
-      showToast('Membersihkan duplikat...', 'info');
-      
-      try {
-        // Get all documents
-        const snapshot = await db.collection(COLLECTION_NAME).get();
-        const partMap = new Map();
-        const duplicateIds = [];
-        
-        // Find duplicates
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          const part = data.part;
-          if (part) {
-            const key = part.toLowerCase().trim();
-            if (partMap.has(key)) {
-              // This is a duplicate - mark for deletion
-              duplicateIds.push(doc.id);
-            } else {
-              partMap.set(key, doc.id);
-            }
-          }
-        });
-        
-        if (duplicateIds.length === 0) {
-          showToast('Tidak ada data duplikat ditemukan', 'success');
-          return;
-        }
-        
-        // Delete duplicates
-        let deleted = 0;
-        for (const id of duplicateIds) {
-          try {
-            await db.collection(COLLECTION_NAME).doc(id).delete();
-            deleted++;
-          } catch (e) {
-            console.error('Delete error:', e);
-          }
-        }
-        
-        showToast(`Berhasil menghapus ${deleted} data duplikat`, 'success');
-        
-      } catch (e) {
-        console.error('Clean duplicates error:', e);
-        showToast('Gagal membersihkan duplikat: ' + e.message, 'error');
-      }
-    }
-
-    // =============================================
-    // UPDATE FUNCTIONS WITH DEDUPLICATION
-    // =============================================
-    async function updateFisikInFirebase(docId, fisik, part) {
-      try {
-        // If we have docId, update directly
-        if (docId) {
-          const item = stockData.find(d => d.id === docId);
-          const selisih = item ? fisik - item.available : 0;
-          await db.collection(COLLECTION_NAME).doc(docId).update({
-            fisik: fisik,
-            selisih: selisih
-          });
-          return true;
-        }
-        
-        // Otherwise, find by PART number
-        if (part) {
-          const querySnapshot = await db.collection(COLLECTION_NAME)
-            .where('part', '==', part)
-            .get();
-          
-          if (!querySnapshot.empty) {
-            const docId2 = querySnapshot.docs[0].id;
-            const data = querySnapshot.docs[0].data();
-            const available = (data.qty || 0) - (data.qtyAlloc || 0);
-            await db.collection(COLLECTION_NAME).doc(docId2).update({
-              fisik: fisik,
-              selisih: fisik - available
-            });
-            return true;
-          }
-        }
-        
-        return false;
-      } catch (e) {
-        console.error('Update error:', e);
-        return false;
       }
     }
 
@@ -817,6 +781,105 @@
     }
 
     // =============================================
+    // FIREBASE WRITE OPERATIONS (WITH DEDUP)
+    // =============================================
+    
+    async function updateFisikInFirebase(docId, fisik, part) {
+      if (!docId && !part) return false;
+      
+      try {
+        let targetDocId = docId;
+        let item = stockData.find(d => d.id === docId);
+        
+        // If no docId, try to find by part
+        if (!targetDocId && part) {
+          targetDocId = await findDocIdByPart(part);
+          if (!targetDocId) {
+            // If not found, this is a new item - create it
+            const existingItem = stockData.find(d => getPartKey(d.part) === getPartKey(part));
+            if (existingItem) {
+              targetDocId = existingItem.id;
+            }
+          }
+        }
+        
+        if (targetDocId) {
+          // Update existing document
+          const selisih = item ? fisik - item.available : 0;
+          await db.collection(COLLECTION_NAME).doc(targetDocId).update({
+            fisik: fisik,
+            selisih: selisih,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          return true;
+        } else if (part) {
+          // Create new document with dedup
+          const newItem = {
+            no: item?.no || stockData.length + 1,
+            part: part,
+            deskripsi: item?.deskripsi || '',
+            qty: item?.qty || 0,
+            qtyAlloc: item?.qtyAlloc || 0,
+            fisik: fisik,
+            selisih: item ? fisik - item.available : 0
+          };
+          const result = await saveItemWithDedup(newItem);
+          return !!result;
+        }
+        
+        return false;
+      } catch (e) {
+        console.error('Update error:', e);
+        return false;
+      }
+    }
+
+    async function syncToFirebase() {
+      if (!stockData.length) { 
+        showToast('Tidak ada data untuk diupload', 'info'); 
+        return; 
+      }
+      if (!confirm('Upload semua data ke Firebase? Data akan di-overwrite berdasarkan PART.')) return;
+      
+      showToast('Mengupload ke Firebase (overwrite)...', 'info');
+      isProcessingUpdate = true;
+      
+      const result = await batchSaveWithDedup(stockData);
+      
+      isProcessingUpdate = false;
+      
+      if (result.failed === 0) {
+        showToast(`Berhasil mengupload ${result.success} item (${result.duplicates} duplikat di-skip)`, 'success');
+      } else {
+        showToast(`Upload: ${result.success} berhasil, ${result.failed} gagal, ${result.duplicates} duplikat`, 'error');
+      }
+    }
+
+    async function resetFisikData() {
+      if (!stockData.length) { showToast('Tidak ada data', 'info'); return; }
+      if (!confirm('Reset FISIK & SELISIH di Firebase?')) return;
+      
+      showToast('Merreset data...', 'info');
+      let success = 0, failed = 0;
+      
+      for (const item of stockData) {
+        if (!item.id) continue;
+        try {
+          await db.collection(COLLECTION_NAME).doc(item.id).update({
+            fisik: null,
+            selisih: null,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          success++;
+        } catch (e) {
+          failed++;
+        }
+      }
+      
+      showToast(`Reset: ${success} berhasil, ${failed} gagal`, success > 0 ? 'success' : 'error');
+    }
+
+    // =============================================
     // AUDIO
     // =============================================
     function initAudio() { try { audioContext = new (window.AudioContext || window.webkitAudioContext)(); } catch {} } 
@@ -847,7 +910,7 @@
         t.style.transform = 'translateX(100%)'; 
         t.style.transition = 'all 0.3s ease'; 
         setTimeout(() => t.remove(), 300); 
-      }, 4000); 
+      }, 3500); 
     }
 
     // =============================================
@@ -887,20 +950,27 @@
           } 
           if (!newData.length) { showToast('Tidak ada data valid', 'error'); return; } 
           
-          showToast(`${newData.length} item dibaca dari Excel, menyimpan ke Firebase...`, 'info');
+          // Replace local data
+          stockData = newData;
           
-          // Save each item with deduplication
-          let saved = 0, failed = 0;
-          for (const item of newData) {
-            const success = await saveItemWithDeduplication(item);
-            if (success) {
-              saved++;
+          // Upload to Firebase with deduplication
+          if (isFirebaseConnected) { 
+            showToast(`Memproses ${newData.length} item ke Firebase...`, 'info');
+            isProcessingUpdate = true;
+            const result = await batchSaveWithDedup(newData);
+            isProcessingUpdate = false;
+            
+            if (result.failed === 0) {
+              showToast(`✅ ${result.success} item diupload (${result.duplicates} duplikat di-skip)`, 'success');
             } else {
-              failed++;
+              showToast(`⚠️ ${result.success} berhasil, ${result.failed} gagal`, 'error');
             }
           }
           
-          showToast(`Selesai: ${saved} berhasil, ${failed} gagal`, failed === 0 ? 'success' : 'error');
+          filteredData = [...stockData];
+          renderTable();
+          updateStats();
+          updateButtons(true);
           
         } catch (err) { 
           console.error(err); 
@@ -920,7 +990,7 @@
         return; 
       } 
       tbody.innerHTML = filteredData.map(item => { 
-        const idx = stockData.findIndex(d => d.id === item.id || (d.no === item.no && d.part === item.part)); 
+        const idx = stockData.findIndex(d => d.id === item.id || (d.part && getPartKey(d.part) === getPartKey(item.part))); 
         const fisikText = item.fisik !== null ? item.fisik : '-'; 
         let selisihText = '-', sClass = 'selisih-zero'; 
         if (item.selisih !== null) { 
@@ -1032,7 +1102,16 @@
 
     async function onScanSuccess(decodedText) { 
       if (cooldownActive) return; 
-      const pn = decodedText.trim(), idx = stockData.findIndex(i => i.part.toLowerCase() === pn.toLowerCase()); 
+      const pn = decodedText.trim();
+      
+      // Find by exact part match
+      let idx = stockData.findIndex(i => i.part.toLowerCase() === pn.toLowerCase());
+      
+      // If not found, try partial match
+      if (idx === -1) {
+        idx = stockData.findIndex(i => i.part.toLowerCase().includes(pn.toLowerCase()) || pn.toLowerCase().includes(i.part.toLowerCase()));
+      }
+      
       if (idx === -1) { 
         playErrorBeep(); 
         document.getElementById('scanResult').classList.remove('hidden'); 
@@ -1047,12 +1126,9 @@
       item.fisik = (item.fisik || 0) + 1; 
       item.selisih = item.fisik - item.available; 
       
-      // Update to Firebase (will handle deduplication)
-      const success = await updateFisikInFirebase(item.id, item.fisik, item.part);
-      
-      if (!success) {
-        // If update failed, try full save with deduplication
-        await saveItemWithDeduplication(item);
+      // Update to Firebase with deduplication
+      if (item.id || item.part) {
+        await updateFisikInFirebase(item.id, item.fisik, item.part);
       }
       
       document.getElementById('scanSuccess').classList.remove('hidden'); 
@@ -1114,7 +1190,12 @@
       const pn = document.getElementById('barcodeInput').value.trim(), qty = parseInt(document.getElementById('qtyInputManual').value); 
       if (!pn) { showToast('Masukkan Part Number', 'error'); return; } 
       if (isNaN(qty) || qty < 0) { showToast('Masukkan Fisik valid', 'error'); return; } 
-      const idx = stockData.findIndex(i => i.part.toLowerCase() === pn.toLowerCase()); 
+      
+      let idx = stockData.findIndex(i => i.part.toLowerCase() === pn.toLowerCase());
+      if (idx === -1) {
+        idx = stockData.findIndex(i => i.part.toLowerCase().includes(pn.toLowerCase()) || pn.toLowerCase().includes(i.part.toLowerCase()));
+      }
+      
       if (idx === -1) { playErrorBeep(); showToast(`Part "${pn}" tidak ditemukan`, 'error'); return; } 
       
       playSuccessBeep(); 
@@ -1122,11 +1203,8 @@
       item.fisik = qty; 
       item.selisih = qty - item.available; 
       
-      // Update to Firebase with deduplication
-      const success = await updateFisikInFirebase(item.id, qty, item.part);
-      
-      if (!success) {
-        await saveItemWithDeduplication(item);
+      if (item.id || item.part) {
+        await updateFisikInFirebase(item.id, qty, item.part);
       }
       
       document.getElementById('searchInput').value = pn; 
@@ -1173,12 +1251,8 @@
       item.fisik = val === '' ? null : parseInt(val) || 0; 
       item.selisih = item.fisik !== null ? item.fisik - item.available : null; 
       
-      // Update to Firebase with deduplication
-      const success = await updateFisikInFirebase(docId, item.fisik, item.part);
-      
-      if (!success && docId) {
-        // Try save with deduplication
-        await saveItemWithDeduplication(item);
+      if (docId || item.part) {
+        await updateFisikInFirebase(docId, item.fisik, item.part);
       }
       
       document.getElementById('searchInput').value = item.part; 
