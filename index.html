@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -24,12 +23,14 @@
     @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.4); } 50% { box-shadow: 0 0 0 10px rgba(250, 204, 21, 0); } }
     @keyframes highlight-row { 0% { background-color: var(--accent-dim); } 100% { background-color: transparent; } }
+    @keyframes realtime-pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
     .animate-fade-up { animation: fadeSlideUp 0.5s ease-out forwards; } .animate-delay-1 { animation-delay: 0.1s; opacity: 0; } .animate-delay-2 { animation-delay: 0.2s; opacity: 0; } .animate-delay-3 { animation-delay: 0.3s; opacity: 0; }
     .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 20px; border-radius: 8px; font-weight: 500; font-size: 14px; transition: all 0.2s ease; cursor: pointer; border: none; outline: none; font-family: 'Space Grotesk', sans-serif; }
     .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     .btn-primary { background: var(--accent); color: var(--bg); } .btn-primary:hover { background: #fbbf24; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(250,204,21,0.3); } .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
     .btn-secondary { background: var(--card); color: var(--fg); border: 1px solid var(--border); } .btn-secondary:hover { background: var(--border); border-color: var(--muted); }
     .btn-danger { background: rgba(239,68,68,0.1); color: var(--danger); border: 1px solid rgba(239,68,68,0.4); } .btn-danger:hover { background: var(--danger); color: white; }
+    .btn-success { background: rgba(34,197,94,0.1); color: var(--success); border: 1px solid rgba(34,197,94,0.4); } .btn-success:hover { background: var(--success); color: white; }
     .btn-ghost { background: transparent; color: var(--muted); padding: 8px; } .btn-ghost:hover { color: var(--fg); background: rgba(255,255,255,0.05); }
     .input { background: var(--bg-secondary); border: 1px solid var(--border); color: var(--fg); padding: 10px 14px; border-radius: 8px; font-size: 14px; transition: all 0.2s ease; width: 100%; font-family: 'Space Grotesk', sans-serif; }
     .input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); } .input::placeholder { color: var(--muted); } .input-highlight { border-color: var(--accent) !important; box-shadow: 0 0 0 3px var(--accent-dim) !important; }
@@ -38,6 +39,7 @@
     th { background: var(--bg-secondary); padding: 14px 16px; text-align: left; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); border-bottom: 1px solid var(--border); white-space: nowrap; position: sticky; top: 0; z-index: 5; }
     td { padding: 14px 16px; border-bottom: 1px solid var(--border); font-size: 14px; }
     tr:last-child td { border-bottom: none; } tr:hover { background: rgba(250,204,21,0.03); } tr.highlight { background: var(--accent-dim); animation: highlight-row 2s ease-out forwards; }
+    tr.realtime-update { animation: highlight-row 1s ease-out forwards; }
     .selisih-positive { color: var(--success); font-weight: 600; } .selisih-negative { color: var(--danger); font-weight: 600; } .selisih-zero { color: var(--muted); }
     .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
     .drop-zone { border: 2px dashed var(--border); border-radius: 12px; padding: 40px; text-align: center; transition: all 0.3s ease; cursor: pointer; } .drop-zone:hover, .drop-zone.dragover { border-color: var(--accent); background: var(--accent-dim); }
@@ -45,6 +47,9 @@
     .modal-content { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; max-width: 500px; width: 90%; transform: scale(0.9); transition: transform 0.3s ease; } .modal-overlay.active .modal-content { transform: scale(1); } .modal-content.modal-lg { max-width: 600px; }
     .stat-card { background: linear-gradient(135deg, var(--card) 0%, var(--bg-secondary) 100%); border: 1px solid var(--border); border-radius: 12px; padding: 20px; position: relative; overflow: hidden; }
     .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--accent); } .stat-card.stat-green::before { background: var(--success); } .stat-card.stat-yellow::before { background: var(--warning); } .stat-card.stat-red::before { background: var(--danger); }
+    .stat-card .stat-change { font-size: 11px; display: inline-block; padding: 2px 8px; border-radius: 4px; margin-left: 6px; }
+    .stat-card .stat-change.positive { background: rgba(34,197,94,0.15); color: var(--success); }
+    .stat-card .stat-change.negative { background: rgba(239,68,68,0.15); color: var(--danger); }
     #qr-reader { width: 100%; border-radius: 12px; overflow: hidden; } #qr-reader video { border-radius: 12px; } #qr-reader__scan_region { background: transparent !important; } #qr-reader__dashboard { display: none !important; }
     .scanner-frame { position: relative; width: 100%; max-width: 400px; margin: 0 auto; }
     .scanner-frame::before, .scanner-frame::after { content: ''; position: absolute; width: 40px; height: 40px; border: 3px solid var(--accent); z-index: 10; pointer-events: none; } .scanner-frame::before { top: 10px; left: 10px; border-right: none; border-bottom: none; } .scanner-frame::after { top: 10px; right: 10px; border-left: none; border-bottom: none; }
@@ -58,7 +63,11 @@
     .toast { padding: 12px 20px; border-radius: 10px; font-size: 14px; font-weight: 500; animation: fadeSlideUp 0.3s ease-out; display: flex; align-items: center; gap: 10px; min-width: 280px; max-width: 400px; box-shadow: 0 8px 30px rgba(0,0,0,0.4); }
     .toast-success { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3); color: #4ade80; } .toast-error { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #f87171; } .toast-info { background: rgba(250,204,21,0.15); border: 1px solid rgba(250,204,21,0.3); color: #facc15; }
     .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; } .status-dot.connected { background: var(--success); box-shadow: 0 0 6px var(--success); } .status-dot.disconnected { background: var(--danger); box-shadow: 0 0 6px var(--danger); } .status-dot.loading { background: var(--warning); animation: pulse-glow 1.5s infinite; }
-    .settings-panel { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; } .settings-panel.open { max-height: 300px; }
+    .status-dot.realtime { background: var(--accent); animation: realtime-pulse 1s infinite; }
+    .settings-panel { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; } .settings-panel.open { max-height: 350px; }
+    .realtime-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+    .realtime-badge.active { background: rgba(34,197,94,0.15); color: var(--success); border: 1px solid rgba(34,197,94,0.3); }
+    .realtime-badge.inactive { background: rgba(239,68,68,0.15); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
     @media (max-width: 768px) { .hide-mobile { display: none; } th, td { padding: 10px 12px; font-size: 13px; } .modal-content { padding: 16px; } }
   </style>
@@ -108,9 +117,24 @@
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3 animate-fade-up">
             <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center"><svg class="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg></div>
-            <div><h1 class="text-lg font-bold">Stock Opname</h1><div class="flex items-center gap-2 text-xs"><span class="status-dot disconnected" id="statusDot"></span><span class="text-gray-500" id="statusText">Belum terhubung</span></div></div>
+            <div>
+              <h1 class="text-lg font-bold">Stock Opname</h1>
+              <div class="flex items-center gap-2 text-xs">
+                <span class="status-dot disconnected" id="statusDot"></span>
+                <span class="text-gray-500" id="statusText">Belum terhubung</span>
+                <span class="realtime-badge inactive" id="realtimeBadge">
+                  <span class="w-1.5 h-1.5 rounded-full bg-red-400 inline-block" id="realtimeDot"></span>
+                  <span id="realtimeText">Realtime OFF</span>
+                </span>
+              </div>
+            </div>
           </div>
           <div class="flex items-center gap-2 animate-fade-up animate-delay-1">
+            <button onclick="toggleRealtime()" class="btn btn-ghost" title="Toggle Realtime" id="realtimeToggle">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              </svg>
+            </button>
             <button onclick="openSettings()" class="btn btn-ghost" title="Pengaturan Firebase"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg></button>
             <button onclick="refreshData()" class="btn btn-ghost" title="Refresh data"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg></button>
             <button onclick="openScannerModal()" class="btn btn-primary"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h2M4 12h2m10 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg><span class="hide-mobile">Scan Barcode</span></button>
@@ -121,7 +145,7 @@
     </header>
 
     <main class="max-w-7xl mx-auto px-4 py-6">
-      <div class="settings-panel mb-6" id="settingsPanel"><div class="card" style="border-color: rgba(250,204,21,0.3);"><div class="flex items-center justify-between mb-4"><h3 class="font-bold flex items-center gap-2"><svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg> Koneksi Firebase</h3><button onclick="closeSettings()" class="btn btn-ghost"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button></div><div class="mb-4"><label class="block text-sm text-gray-400 mb-2">Status Firebase</label><div id="firebaseStatus" class="flex items-center gap-2 p-3 rounded-lg bg-gray-800"><span class="status-dot disconnected" id="fbStatusDot"></span><span id="fbStatusText" class="text-gray-400">Belum terhubung</span></div></div><div class="flex flex-wrap gap-2"><button onclick="testConnection()" class="btn btn-secondary text-sm"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> Test Koneksi</button><button onclick="syncToFirebase()" class="btn btn-secondary text-sm" id="btnSyncToFirebase" disabled><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg> Upload ke Firebase</button><button onclick="resetFisik()" class="btn btn-danger text-sm" id="btnResetFirebase" disabled>Reset Fisik & Selisih</button></div></div></div>
+      <div class="settings-panel mb-6" id="settingsPanel"><div class="card" style="border-color: rgba(250,204,21,0.3);"><div class="flex items-center justify-between mb-4"><h3 class="font-bold flex items-center gap-2"><svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg> Koneksi Firebase</h3><button onclick="closeSettings()" class="btn btn-ghost"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button></div><div class="mb-4"><label class="block text-sm text-gray-400 mb-2">Status Firebase</label><div id="firebaseStatus" class="flex items-center gap-2 p-3 rounded-lg bg-gray-800"><span class="status-dot disconnected" id="fbStatusDot"></span><span id="fbStatusText" class="text-gray-400">Belum terhubung</span></div></div><div class="mb-4"><label class="block text-sm text-gray-400 mb-2">Realtime Update</label><div class="flex items-center gap-3"><button onclick="toggleRealtime()" id="realtimeToggleBtn" class="btn btn-success text-sm"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> <span id="realtimeToggleText">Aktifkan Realtime</span></button><span id="realtimeStatusText" class="text-xs text-gray-500">Off</span></div></div><div class="flex flex-wrap gap-2"><button onclick="testConnection()" class="btn btn-secondary text-sm"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> Test Koneksi</button><button onclick="syncToFirebase()" class="btn btn-secondary text-sm" id="btnSyncToFirebase" disabled><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg> Upload ke Firebase</button><button onclick="resetFisik()" class="btn btn-danger text-sm" id="btnResetFirebase" disabled>Reset Fisik & Selisih</button></div></div></div>
 
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div class="stat-card animate-fade-up animate-delay-1"><p class="text-xs text-gray-500 mb-1">Total Items</p><p id="stat-total" class="text-2xl font-bold font-mono">0</p></div>
@@ -141,7 +165,7 @@
         </table>
       </div>
 
-      <div class="mt-6 p-4 rounded-lg" style="background: var(--accent-dim); border: 1px solid rgba(250,204,21,0.3);"><div class="flex items-start gap-3"><svg class="w-5 h-5 text-yellow-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><div class="text-sm"><p class="text-yellow-400 font-medium mb-1">Info</p><ol class="text-gray-400 space-y-1 list-decimal list-inside"><li>Klik ikon roda gigi untuk melihat status Firebase</li><li>Upload Excel atau klik Refresh untuk ambil data dari Firebase</li><li>Setiap berhasil scan, FISIK dan SELISIH otomatis tersinkron ke Firebase</li></ol></div></div></div>
+      <div class="mt-6 p-4 rounded-lg" style="background: var(--accent-dim); border: 1px solid rgba(250,204,21,0.3);"><div class="flex items-start gap-3"><svg class="w-5 h-5 text-yellow-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><div class="text-sm"><p class="text-yellow-400 font-medium mb-1">Info</p><ol class="text-gray-400 space-y-1 list-decimal list-inside"><li>Klik ikon roda gigi untuk melihat status Firebase</li><li>Upload Excel atau klik Refresh untuk ambil data dari Firebase</li><li>Setiap berhasil scan, FISIK dan SELISIH otomatis tersinkron ke Firebase</li><li>Data akan update realtime tanpa perlu refresh jika Realtime aktif</li></ol></div></div></div>
     </main>
   </div>
 
@@ -184,6 +208,10 @@
     let firebaseDb = null;
     let isFirebaseConnected = false;
     let isDataFromFirebase = false;
+    let isRealtimeActive = false;
+    let realtimeListener = null;
+    let isLocalUpdate = false;
+    let lastUpdateTime = 0;
 
     // =============================================
     // FIREBASE INIT
@@ -196,6 +224,10 @@
         updateFirebaseStatus('connected', 'Terhubung ke Firebase');
         document.getElementById('btnSyncToFirebase').disabled = false;
         document.getElementById('btnResetFirebase').disabled = false;
+        // Auto enable realtime
+        if (!isRealtimeActive) {
+          toggleRealtime();
+        }
         return true;
       } catch (e) {
         console.error('Firebase init error:', e);
@@ -224,6 +256,129 @@
     }
 
     // =============================================
+    // REALTIME LISTENER
+    // =============================================
+    function toggleRealtime() {
+      if (!firebaseDb) {
+        showToast('Firebase belum terhubung', 'error');
+        return;
+      }
+      
+      isRealtimeActive = !isRealtimeActive;
+      
+      if (isRealtimeActive) {
+        // Start realtime listener
+        startRealtimeListener();
+        updateRealtimeUI(true);
+        showToast('Realtime diaktifkan', 'success');
+      } else {
+        // Stop realtime listener
+        stopRealtimeListener();
+        updateRealtimeUI(false);
+        showToast('Realtime dinonaktifkan', 'info');
+      }
+    }
+
+    function startRealtimeListener() {
+      if (realtimeListener) return;
+      
+      try {
+        realtimeListener = firebaseDb.ref('stockData').on('value', (snapshot) => {
+          // Skip if this is a local update
+          if (isLocalUpdate) {
+            isLocalUpdate = false;
+            return;
+          }
+          
+          const data = snapshot.val();
+          if (!data) return;
+          
+          // Convert to array
+          const newData = Object.keys(data).map(key => ({
+            ...data[key],
+            firebaseKey: key,
+            available: (data[key].qty || 0) - (data[key].qtyAlloc || 0)
+          }));
+          
+          // Check if data actually changed
+          const currentJson = JSON.stringify(stockData.map(d => ({...d, firebaseKey: d.firebaseKey})));
+          const newJson = JSON.stringify(newData);
+          
+          if (currentJson !== newJson) {
+            // Data changed externally - update UI
+            stockData = newData;
+            isDataFromFirebase = true;
+            filteredData = [...stockData];
+            renderTable();
+            updateStats();
+            updateButtons(true);
+            
+            // Show notification
+            const now = Date.now();
+            if (now - lastUpdateTime > 1000) {
+              showToast('Data diperbarui realtime', 'info');
+              lastUpdateTime = now;
+            }
+            
+            // Update connection status
+            updateConnectionStatus('realtime', 'Realtime — ' + stockData.length + ' items');
+          }
+        });
+        
+        // Update status dot to realtime mode
+        document.getElementById('statusDot').className = 'status-dot realtime';
+        document.getElementById('statusText').textContent = 'Realtime aktif — ' + (stockData.length || 0) + ' items';
+        
+      } catch (e) {
+        console.error('Realtime listener error:', e);
+        isRealtimeActive = false;
+        updateRealtimeUI(false);
+        showToast('Gagal mengaktifkan realtime', 'error');
+      }
+    }
+
+    function stopRealtimeListener() {
+      if (realtimeListener && firebaseDb) {
+        firebaseDb.ref('stockData').off('value', realtimeListener);
+        realtimeListener = null;
+      }
+      // Reset status dot
+      if (isFirebaseConnected) {
+        document.getElementById('statusDot').className = 'status-dot connected';
+        document.getElementById('statusText').textContent = 'Terhubung — ' + (stockData.length || 0) + ' items';
+      }
+    }
+
+    function updateRealtimeUI(active) {
+      const badge = document.getElementById('realtimeBadge');
+      const dot = document.getElementById('realtimeDot');
+      const text = document.getElementById('realtimeText');
+      const toggleBtn = document.getElementById('realtimeToggleBtn');
+      const toggleText = document.getElementById('realtimeToggleText');
+      const statusText = document.getElementById('realtimeStatusText');
+      
+      if (active) {
+        badge.className = 'realtime-badge active';
+        dot.className = 'w-1.5 h-1.5 rounded-full bg-green-400 inline-block';
+        text.textContent = 'Realtime ON';
+        toggleText.textContent = 'Nonaktifkan Realtime';
+        statusText.textContent = 'Aktif';
+        if (toggleBtn) {
+          toggleBtn.className = 'btn btn-danger text-sm';
+        }
+      } else {
+        badge.className = 'realtime-badge inactive';
+        dot.className = 'w-1.5 h-1.5 rounded-full bg-red-400 inline-block';
+        text.textContent = 'Realtime OFF';
+        toggleText.textContent = 'Aktifkan Realtime';
+        statusText.textContent = 'Nonaktif';
+        if (toggleBtn) {
+          toggleBtn.className = 'btn btn-success text-sm';
+        }
+      }
+    }
+
+    // =============================================
     // FIREBASE CRUD OPERATIONS
     // =============================================
     async function loadDataFromFirebase() {
@@ -234,23 +389,22 @@
         const data = snapshot.val();
         
         if (data) {
-          stockData = Object.values(data).map(item => ({
-            no: item.no || 0,
-            part: item.part || '',
-            deskripsi: item.deskripsi || '',
-            qty: item.qty || 0,
-            qtyAlloc: item.qtyAlloc || 0,
-            available: (item.qty || 0) - (item.qtyAlloc || 0),
-            fisik: item.fisik !== undefined && item.fisik !== null ? item.fisik : null,
-            selisih: item.selisih !== undefined && item.selisih !== null ? item.selisih : null,
-            firebaseKey: item.key || null
+          stockData = Object.keys(data).map(key => ({
+            ...data[key],
+            firebaseKey: key,
+            available: (data[key].qty || 0) - (data[key].qtyAlloc || 0)
           }));
           isDataFromFirebase = true;
           filteredData = [...stockData];
           renderTable();
           updateStats();
           updateButtons(true);
-          updateConnectionStatus('connected', 'Terhubung — ' + stockData.length + ' items');
+          
+          if (isRealtimeActive) {
+            updateConnectionStatus('realtime', 'Realtime — ' + stockData.length + ' items');
+          } else {
+            updateConnectionStatus('connected', 'Terhubung — ' + stockData.length + ' items');
+          }
           showToast(`${stockData.length} item dimuat dari Firebase`, 'success');
         } else {
           stockData = [];
@@ -269,18 +423,22 @@
     }
 
     async function updateFisikToFirebase(index, fisik) {
-      if (!firebaseDb) return;
+      if (!firebaseDb) return false;
       try {
         const item = stockData[index];
-        if (!item) return;
+        if (!item) return false;
         
         // Cari key berdasarkan part number
         const snapshot = await firebaseDb.ref('stockData').orderByChild('part').equalTo(item.part).once('value');
         const data = snapshot.val();
-        let key = null;
-        if (data) {
+        let key = item.firebaseKey || null;
+        
+        if (!key && data) {
           key = Object.keys(data)[0];
         }
+        
+        // Set local update flag to prevent realtime loop
+        isLocalUpdate = true;
         
         if (key) {
           await firebaseDb.ref(`stockData/${key}`).update({
@@ -307,6 +465,7 @@
       } catch (e) {
         console.error('Update Firebase error:', e);
         showToast('Gagal update ke Firebase', 'error');
+        isLocalUpdate = false;
         return false;
       }
     }
@@ -327,7 +486,8 @@
         // Clear existing data
         await firebaseDb.ref('stockData').remove();
         
-        // Upload new data
+        // Upload new data with local update flag
+        isLocalUpdate = true;
         const updates = {};
         stockData.forEach((item, idx) => {
           const key = `item_${idx}_${Date.now()}`;
@@ -344,10 +504,14 @@
         await firebaseDb.ref('stockData').set(updates);
         showToast(`${stockData.length} item diupload ke Firebase`, 'success');
         isDataFromFirebase = true;
-        setTimeout(() => loadDataFromFirebase(), 500);
+        setTimeout(() => {
+          isLocalUpdate = false;
+          loadDataFromFirebase();
+        }, 500);
       } catch (e) {
         console.error('Sync error:', e);
         showToast('Gagal upload ke Firebase', 'error');
+        isLocalUpdate = false;
       }
     }
 
@@ -355,12 +519,17 @@
       if (!firebaseDb) return;
       if (!confirm('Reset FISIK & SELISIH di Firebase?')) return;
       try {
+        isLocalUpdate = true;
         await firebaseDb.ref('stockData').update({ fisik: null, selisih: null });
         showToast('Berhasil direset', 'success');
-        loadDataFromFirebase();
+        setTimeout(() => {
+          isLocalUpdate = false;
+          loadDataFromFirebase();
+        }, 300);
       } catch (e) {
         console.error('Reset error:', e);
         showToast('Gagal reset', 'error');
+        isLocalUpdate = false;
       }
     }
 
@@ -392,6 +561,12 @@
 
     function handleLogout() {
       if (!confirm('Yakin ingin logout?')) return;
+      // Stop realtime on logout
+      if (isRealtimeActive) {
+        stopRealtimeListener();
+        isRealtimeActive = false;
+        updateRealtimeUI(false);
+      }
       localStorage.removeItem('stockOpnameLoggedIn');
       showLogin();
     }
@@ -473,8 +648,7 @@
     }
 
     // =============================================
-    // FILE UPLOAD & TABLE
-    // =============================================
+    // FILE UPLOAD & TABLE    // =============================================
     function setupFileUpload() { 
       const dz = document.getElementById('dropZone'), fi = document.getElementById('fileInput'); 
       dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); }); 
@@ -554,7 +728,14 @@
     function clearSearch() { document.getElementById('searchInput').value = ''; filterData(); } 
     function highlightSearchInput() { const e = document.getElementById('searchInput'); e.classList.add('input-highlight'); setTimeout(() => e.classList.remove('input-highlight'), 1000); }
     function refreshData() { 
-      if (isFirebaseConnected) { loadDataFromFirebase(); } else { 
+      if (isFirebaseConnected) { 
+        loadDataFromFirebase(); 
+        // Ensure realtime is active after refresh
+        if (isRealtimeActive) {
+          stopRealtimeListener();
+          startRealtimeListener();
+        }
+      } else { 
         showToast('Firebase belum terhubung', 'error'); 
         initFirebase(); 
       } 
@@ -759,6 +940,13 @@
       o.addEventListener('click', e => { 
         if (e.target === o) { o.classList.remove('active'); stopCamera(); clearCooldown(); } 
       }); 
+    });
+
+    // Clean up realtime listener on page unload
+    window.addEventListener('beforeunload', () => {
+      if (realtimeListener && firebaseDb) {
+        firebaseDb.ref('stockData').off('value', realtimeListener);
+      }
     });
   </script>
 </body>
