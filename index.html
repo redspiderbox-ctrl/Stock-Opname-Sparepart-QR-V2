@@ -68,6 +68,8 @@
     .realtime-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 500; }
     .realtime-badge.active { background: rgba(34,197,94,0.15); color: var(--success); border: 1px solid rgba(34,197,94,0.3); }
     .realtime-badge.inactive { background: rgba(239,68,68,0.15); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); }
+    .btn-delete-all { background: rgba(239,68,68,0.15); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); }
+    .btn-delete-all:hover { background: var(--danger); color: white; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(239,68,68,0.3); }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
     @media (max-width: 768px) { .hide-mobile { display: none; } th, td { padding: 10px 12px; font-size: 13px; } .modal-content { padding: 16px; } }
   </style>
@@ -145,7 +147,7 @@
     </header>
 
     <main class="max-w-7xl mx-auto px-4 py-6">
-      <div class="settings-panel mb-6" id="settingsPanel"><div class="card" style="border-color: rgba(250,204,21,0.3);"><div class="flex items-center justify-between mb-4"><h3 class="font-bold flex items-center gap-2"><svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg> Koneksi Firebase</h3><button onclick="closeSettings()" class="btn btn-ghost"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button></div><div class="mb-4"><label class="block text-sm text-gray-400 mb-2">Status Firebase</label><div id="firebaseStatus" class="flex items-center gap-2 p-3 rounded-lg bg-gray-800"><span class="status-dot disconnected" id="fbStatusDot"></span><span id="fbStatusText" class="text-gray-400">Belum terhubung</span></div></div><div class="mb-4"><label class="block text-sm text-gray-400 mb-2">Realtime Update</label><div class="flex items-center gap-3"><button onclick="toggleRealtime()" id="realtimeToggleBtn" class="btn btn-success text-sm"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> <span id="realtimeToggleText">Aktifkan Realtime</span></button><span id="realtimeStatusText" class="text-xs text-gray-500">Off</span></div></div><div class="flex flex-wrap gap-2"><button onclick="testConnection()" class="btn btn-secondary text-sm"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> Test Koneksi</button><button onclick="syncToFirebase()" class="btn btn-secondary text-sm" id="btnSyncToFirebase" disabled><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg> Upload ke Firebase</button><button onclick="resetFisik()" class="btn btn-danger text-sm" id="btnResetFirebase" disabled>Reset Fisik & Selisih</button></div></div></div>
+      <div class="settings-panel mb-6" id="settingsPanel"><div class="card" style="border-color: rgba(250,204,21,0.3);"><div class="flex items-center justify-between mb-4"><h3 class="font-bold flex items-center gap-2"><svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg> Koneksi Firebase</h3><button onclick="closeSettings()" class="btn btn-ghost"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button></div><div class="mb-4"><label class="block text-sm text-gray-400 mb-2">Status Firebase</label><div id="firebaseStatus" class="flex items-center gap-2 p-3 rounded-lg bg-gray-800"><span class="status-dot disconnected" id="fbStatusDot"></span><span id="fbStatusText" class="text-gray-400">Belum terhubung</span></div></div><div class="mb-4"><label class="block text-sm text-gray-400 mb-2">Realtime Update</label><div class="flex items-center gap-3"><button onclick="toggleRealtime()" id="realtimeToggleBtn" class="btn btn-success text-sm"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> <span id="realtimeToggleText">Aktifkan Realtime</span></button><span id="realtimeStatusText" class="text-xs text-gray-500">Nonaktif</span></div></div><div class="flex flex-wrap gap-2"><button onclick="testConnection()" class="btn btn-secondary text-sm"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> Test Koneksi</button><button onclick="syncToFirebase()" class="btn btn-secondary text-sm" id="btnSyncToFirebase" disabled><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg> Upload ke Firebase</button><button onclick="resetFisik()" class="btn btn-danger text-sm" id="btnResetFirebase" disabled>Reset Fisik & Selisih</button><button onclick="deleteAllData()" class="btn btn-delete-all text-sm" id="btnDeleteAll" disabled><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg> Hapus Semua Data</button></div></div></div>
 
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div class="stat-card animate-fade-up animate-delay-1"><p class="text-xs text-gray-500 mb-1">Total Items</p><p id="stat-total" class="text-2xl font-bold font-mono">0</p></div>
@@ -154,7 +156,7 @@
         <div class="stat-card stat-red animate-fade-up animate-delay-3"><p class="text-xs text-gray-500 mb-1">Ada Selisih</p><p id="stat-diff" class="text-2xl font-bold font-mono text-red-400">0</p></div>
       </div>
 
-      <div class="card mb-6 animate-fade-up animate-delay-2"><div class="flex flex-wrap items-center gap-4"><div class="flex-1 min-w-[200px]"><label class="drop-zone block" id="dropZone"><input type="file" id="fileInput" accept=".xlsx,.xls" class="hidden"><svg class="w-8 h-8 mx-auto mb-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg><p class="text-sm text-gray-400">Drop Excel file atau klik untuk upload</p><p class="text-xs text-gray-600 mt-1">Format: NO, PART, DESKRIPSI PART, QTY, QTY ALLOC</p></label></div><div class="flex flex-wrap gap-2"><button onclick="downloadExcel()" class="btn btn-secondary" id="btnDownloadExcel" disabled><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg> Export Excel</button><button onclick="downloadPDF()" class="btn btn-secondary" id="btnDownloadPDF" disabled><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg> Export PDF</button><button onclick="clearLocalData()" class="btn btn-danger" id="btnClear" disabled><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg> Clear</button></div></div></div>
+      <div class="card mb-6 animate-fade-up animate-delay-2"><div class="flex flex-wrap items-center gap-4"><div class="flex-1 min-w-[200px]"><label class="drop-zone block" id="dropZone"><input type="file" id="fileInput" accept=".xlsx,.xls" class="hidden"><svg class="w-8 h-8 mx-auto mb-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg><p class="text-sm text-gray-400">Drop Excel file atau klik untuk upload</p><p class="text-xs text-gray-600 mt-1">Format: NO, PART, DESKRIPSI PART, QTY, QTY ALLOC</p></label></div><div class="flex flex-wrap gap-2"><button onclick="downloadExcel()" class="btn btn-secondary" id="btnDownloadExcel" disabled><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg> Export Excel</button><button onclick="downloadPDF()" class="btn btn-secondary" id="btnDownloadPDF" disabled><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg> Export PDF</button><button onclick="confirmDeleteAll()" class="btn btn-delete-all" id="btnDeleteLocal" disabled><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg> Hapus Data</button></div></div></div>
 
       <div class="mb-4 animate-fade-up animate-delay-3"><div class="relative"><svg class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg><input type="text" id="searchInput" class="input pl-10" placeholder="Cari berdasarkan No, Part, atau Deskripsi..." oninput="filterData()"><button onclick="clearSearch()" class="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-700 rounded transition-colors text-gray-500 hover:text-gray-300"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button></div></div>
 
@@ -165,7 +167,7 @@
         </table>
       </div>
 
-      <div class="mt-6 p-4 rounded-lg" style="background: var(--accent-dim); border: 1px solid rgba(250,204,21,0.3);"><div class="flex items-start gap-3"><svg class="w-5 h-5 text-yellow-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><div class="text-sm"><p class="text-yellow-400 font-medium mb-1">Info</p><ol class="text-gray-400 space-y-1 list-decimal list-inside"><li>Klik ikon roda gigi untuk melihat status Firebase</li><li>Upload Excel atau klik Refresh untuk ambil data dari Firebase</li><li>Setiap berhasil scan, FISIK dan SELISIH otomatis tersinkron ke Firebase</li><li>Data akan update realtime tanpa perlu refresh jika Realtime aktif</li></ol></div></div></div>
+      <div class="mt-6 p-4 rounded-lg" style="background: var(--accent-dim); border: 1px solid rgba(250,204,21,0.3);"><div class="flex items-start gap-3"><svg class="w-5 h-5 text-yellow-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><div class="text-sm"><p class="text-yellow-400 font-medium mb-1">Info</p><ol class="text-gray-400 space-y-1 list-decimal list-inside"><li>Klik ikon roda gigi untuk melihat status Firebase</li><li>Upload Excel atau klik Refresh untuk ambil data dari Firebase</li><li>Setiap berhasil scan, FISIK dan SELISIH otomatis tersinkron ke Firebase</li><li>Data akan update realtime tanpa perlu refresh jika Realtime aktif</li><li>Tombol "Hapus Data" akan menghapus semua data di Firebase</li></ol></div></div></div>
     </main>
   </div>
 
@@ -174,6 +176,9 @@
 
   <!-- Edit Modal -->
   <div class="modal-overlay" id="editModal"><div class="modal-content"><div class="flex items-center justify-between mb-4"><h3 class="text-lg font-bold">Edit Fisik</h3><button onclick="closeEditModal()" class="p-2 hover:bg-gray-800 rounded-lg transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button></div><div class="mb-4"><p class="text-sm text-gray-400 mb-1">Part Number</p><p id="editPart" class="font-mono font-bold text-lg"></p></div><div class="mb-4"><p class="text-sm text-gray-400 mb-1">Deskripsi</p><p id="editDesc" class="text-gray-300"></p></div><div class="grid grid-cols-3 gap-4 mb-4"><div><p class="text-sm text-gray-400 mb-1">QTY</p><p id="editQty" class="font-mono font-bold text-xl"></p></div><div><p class="text-sm text-gray-400 mb-1">QTY Alloc</p><p id="editQtyAlloc" class="font-mono font-bold text-xl"></p></div><div><p class="text-sm text-gray-400 mb-1">Available</p><p id="editAvailable" class="font-mono font-bold text-xl text-yellow-400"></p></div></div><div class="mb-4"><label class="text-sm text-gray-400 mb-1 block">Fisik</label><input type="number" id="editQtyFisik" class="input font-mono text-lg" min="0"></div><input type="hidden" id="editIndex"><input type="hidden" id="editRowIndex"><div class="flex gap-2"><button onclick="saveEdit()" class="btn btn-primary flex-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Simpan</button><button onclick="closeEditModal()" class="btn btn-secondary">Batal</button></div></div></div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" id="deleteModal"><div class="modal-content" style="border-color: rgba(239,68,68,0.4);"><div class="flex items-center justify-between mb-4"><h3 class="text-lg font-bold text-danger">Konfirmasi Hapus Data</h3><button onclick="closeDeleteModal()" class="p-2 hover:bg-gray-800 rounded-lg transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button></div><div class="mb-4"><div class="flex items-center gap-3 p-4 rounded-lg bg-red-900/20 border border-red-500/30"><svg class="w-8 h-8 text-danger flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg><div><p class="font-semibold text-danger">PERINGATAN!</p><p class="text-sm text-gray-300">Anda akan menghapus <span id="deleteCount" class="font-bold text-white">0</span> data secara permanen dari Firebase.</p><p class="text-sm text-red-400 mt-1">Tindakan ini tidak dapat dibatalkan!</p></div></div></div><div class="mb-4"><label class="block text-sm text-gray-400 mb-2">Ketik "HAPUS" untuk konfirmasi</label><input type="text" id="deleteConfirmInput" class="input font-mono" placeholder="Ketik HAPUS" oninput="validateDeleteConfirm()"></div><div class="flex gap-2"><button onclick="executeDeleteAll()" id="deleteConfirmBtn" class="btn btn-danger flex-1" disabled><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg> Hapus Semua</button><button onclick="closeDeleteModal()" class="btn btn-secondary">Batal</button></div></div></div>
 
   <script>
     // =============================================
@@ -224,6 +229,7 @@
         updateFirebaseStatus('connected', 'Terhubung ke Firebase');
         document.getElementById('btnSyncToFirebase').disabled = false;
         document.getElementById('btnResetFirebase').disabled = false;
+        document.getElementById('btnDeleteAll').disabled = false;
         // Auto enable realtime
         if (!isRealtimeActive) {
           toggleRealtime();
@@ -244,9 +250,11 @@
       if (status === 'connected') {
         document.getElementById('btnSyncToFirebase').disabled = false;
         document.getElementById('btnResetFirebase').disabled = false;
+        document.getElementById('btnDeleteAll').disabled = false;
       } else {
         document.getElementById('btnSyncToFirebase').disabled = true;
         document.getElementById('btnResetFirebase').disabled = true;
+        document.getElementById('btnDeleteAll').disabled = true;
       }
     }
 
@@ -291,7 +299,16 @@
           }
           
           const data = snapshot.val();
-          if (!data) return;
+          if (!data) {
+            // Data kosong - clear local data
+            stockData = [];
+            filteredData = [];
+            renderTable();
+            updateStats();
+            updateButtons(false);
+            updateConnectionStatus('connected', 'Terhubung — tidak ada data');
+            return;
+          }
           
           // Convert to array
           const newData = Object.keys(data).map(key => ({
@@ -534,6 +551,70 @@
     }
 
     // =============================================
+    // DELETE ALL DATA FUNCTION
+    // =============================================
+    function confirmDeleteAll() {
+      if (!firebaseDb) {
+        showToast('Firebase belum terhubung', 'error');
+        return;
+      }
+      if (!stockData.length) {
+        showToast('Tidak ada data untuk dihapus', 'info');
+        return;
+      }
+      
+      // Show delete confirmation modal
+      document.getElementById('deleteCount').textContent = stockData.length;
+      document.getElementById('deleteConfirmInput').value = '';
+      document.getElementById('deleteConfirmBtn').disabled = true;
+      document.getElementById('deleteModal').classList.add('active');
+      setTimeout(() => document.getElementById('deleteConfirmInput').focus(), 100);
+    }
+
+    function closeDeleteModal() {
+      document.getElementById('deleteModal').classList.remove('active');
+      document.getElementById('deleteConfirmInput').value = '';
+      document.getElementById('deleteConfirmBtn').disabled = true;
+    }
+
+    function validateDeleteConfirm() {
+      const input = document.getElementById('deleteConfirmInput').value.toUpperCase();
+      document.getElementById('deleteConfirmBtn').disabled = input !== 'HAPUS';
+    }
+
+    async function executeDeleteAll() {
+      if (!firebaseDb) return;
+      
+      const btn = document.getElementById('deleteConfirmBtn');
+      btn.disabled = true;
+      btn.textContent = 'Menghapus...';
+      
+      try {
+        isLocalUpdate = true;
+        await firebaseDb.ref('stockData').remove();
+        showToast(`Semua data (${stockData.length} item) berhasil dihapus dari Firebase`, 'success');
+        closeDeleteModal();
+        setTimeout(() => {
+          isLocalUpdate = false;
+          stockData = [];
+          filteredData = [];
+          renderTable();
+          updateStats();
+          updateButtons(false);
+          updateConnectionStatus('connected', 'Terhubung — tidak ada data');
+          showToast('Data telah dihapus', 'info');
+        }, 300);
+      } catch (e) {
+        console.error('Delete all error:', e);
+        showToast('Gagal menghapus data', 'error');
+        isLocalUpdate = false;
+      } finally {
+        btn.textContent = 'Hapus Semua';
+        btn.disabled = false;
+      }
+    }
+
+    // =============================================
     // AUTHENTICATION SYSTEM
     // =============================================
     function checkLoginStatus() {
@@ -648,7 +729,8 @@
     }
 
     // =============================================
-    // FILE UPLOAD & TABLE    // =============================================
+    // FILE UPLOAD & TABLE
+    // =============================================
     function setupFileUpload() { 
       const dz = document.getElementById('dropZone'), fi = document.getElementById('fileInput'); 
       dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); }); 
@@ -723,7 +805,12 @@
       document.getElementById('stat-pending').textContent = t - c; 
       document.getElementById('stat-diff').textContent = stockData.filter(i => i.selisih !== null && i.selisih !== 0).length; 
     }
-    function updateButtons(has) { document.getElementById('btnDownloadExcel').disabled = !has; document.getElementById('btnDownloadPDF').disabled = !has; document.getElementById('btnClear').disabled = !has; }
+    function updateButtons(has) { 
+      document.getElementById('btnDownloadExcel').disabled = !has; 
+      document.getElementById('btnDownloadPDF').disabled = !has; 
+      document.getElementById('btnDeleteLocal').disabled = !has || !isFirebaseConnected;
+      document.getElementById('btnDeleteAll').disabled = !has || !isFirebaseConnected;
+    }
     function filterData() { const q = document.getElementById('searchInput').value.toLowerCase().trim(); filteredData = !q ? [...stockData] : stockData.filter(i => i.no.toString().includes(q) || i.part.toLowerCase().includes(q) || i.deskripsi.toLowerCase().includes(q)); renderTable(); }
     function clearSearch() { document.getElementById('searchInput').value = ''; filterData(); } 
     function highlightSearchInput() { const e = document.getElementById('searchInput'); e.classList.add('input-highlight'); setTimeout(() => e.classList.remove('input-highlight'), 1000); }
@@ -913,15 +1000,6 @@
       doc.save(`Stock_Opname_${new Date().toISOString().split('T')[0]}.pdf`); showToast('PDF Portrait + Total berhasil diunduh', 'success'); 
     }
 
-    function clearLocalData() { 
-      if (!confirm('Hapus semua data lokal?')) return; 
-      stockData = []; filteredData = []; 
-      document.getElementById('searchInput').value = ''; 
-      document.getElementById('fileInput').value = ''; 
-      renderTable(); updateStats(); updateButtons(false); 
-      showToast('Data lokal dihapus', 'info'); 
-    }
-
     // =============================================
     // INIT
     // =============================================
@@ -934,11 +1012,14 @@
     });
 
     document.addEventListener('keydown', e => { 
-      if (e.key === 'Escape') { closeScannerModal(); closeEditModal(); closeSettings(); } 
+      if (e.key === 'Escape') { closeScannerModal(); closeEditModal(); closeSettings(); closeDeleteModal(); } 
     });
     document.querySelectorAll('.modal-overlay').forEach(o => { 
       o.addEventListener('click', e => { 
-        if (e.target === o) { o.classList.remove('active'); stopCamera(); clearCooldown(); } 
+        if (e.target === o) { 
+          o.classList.remove('active'); 
+          if (o.id === 'scannerModal') { stopCamera(); clearCooldown(); }
+        } 
       }); 
     });
 
