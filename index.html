@@ -63,9 +63,10 @@
     .toast { padding: 12px 20px; border-radius: 10px; font-size: 14px; font-weight: 500; animation: fadeSlideUp 0.3s ease-out; display: flex; align-items: center; gap: 10px; min-width: 280px; max-width: 400px; box-shadow: 0 8px 30px rgba(0,0,0,0.4); }
     .toast-success { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3); color: #4ade80; } .toast-error { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #f87171; } .toast-info { background: rgba(250,204,21,0.15); border: 1px solid rgba(250,204,21,0.3); color: #facc15; }
     .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; } .status-dot.connected { background: var(--success); box-shadow: 0 0 6px var(--success); } .status-dot.disconnected { background: var(--danger); box-shadow: 0 0 6px var(--danger); } .status-dot.loading { background: var(--warning); animation: pulse-glow 1.5s infinite; }
-    .settings-panel { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; } .settings-panel.open { max-height: 300px; }
+    .settings-panel { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; } .settings-panel.open { max-height: 350px; }
     .realtime-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: 12px; font-size: 10px; font-weight: 600; background: rgba(34,197,94,0.15); color: var(--success); border: 1px solid rgba(34,197,94,0.2); }
     .realtime-badge .pulse-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); animation: pulse-glow 1.5s infinite; }
+    .dedup-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: 12px; font-size: 10px; font-weight: 600; background: rgba(250,204,21,0.15); color: var(--accent); border: 1px solid rgba(250,204,21,0.2); }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
     @media (max-width: 768px) { .hide-mobile { display: none; } th, td { padding: 10px 12px; font-size: 13px; } .modal-content { padding: 16px; } }
   </style>
@@ -119,6 +120,7 @@
               <h1 class="text-lg font-bold flex items-center gap-2">
                 Stock Opname
                 <span class="realtime-badge"><span class="pulse-dot"></span> LIVE</span>
+                <span class="dedup-badge">🔄 NO DUPLICATE</span>
               </h1>
               <div class="flex items-center gap-2 text-xs">
                 <span class="status-dot disconnected" id="statusDot"></span>
@@ -145,6 +147,14 @@
             </h3>
             <button onclick="closeSettings()" class="btn btn-ghost"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
           </div>
+          
+          <div class="mb-4 p-3 rounded-lg" style="background: var(--accent-dim); border: 1px solid rgba(250,204,21,0.2);">
+            <p class="text-xs text-yellow-400 font-medium flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <span>Deduplikasi Aktif: Data akan ditimpa berdasarkan PART NUMBER yang sama</span>
+            </p>
+          </div>
+          
           <div class="mb-4">
             <label class="block text-sm text-gray-400 mb-2">Status Database</label>
             <div class="flex flex-wrap gap-2">
@@ -159,11 +169,16 @@
               <button onclick="resetFisikData()" class="btn btn-danger text-sm flex-1 min-w-[120px]" id="btnResetFisik">
                 Reset Fisik & Selisih
               </button>
+              <button onclick="cleanDuplicates()" class="btn btn-warning text-sm flex-1 min-w-[120px]" style="background: rgba(249,115,22,0.1); color: var(--warning); border: 1px solid rgba(249,115,22,0.3);">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                Bersihkan Duplikat
+              </button>
             </div>
           </div>
-          <div class="text-xs text-gray-600 flex items-center gap-2">
+          <div class="text-xs text-gray-600 flex items-center gap-2 flex-wrap">
             <span id="dbStatusText">Firebase Firestore</span>
             <span class="realtime-badge"><span class="pulse-dot"></span> Realtime Sync Aktif</span>
+            <span class="dedup-badge">🔄 Deduplikasi: ON</span>
           </div>
         </div>
       </div>
@@ -183,6 +198,7 @@
               <svg class="w-8 h-8 mx-auto mb-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
               <p class="text-sm text-gray-400">Drop Excel file atau klik untuk upload</p>
               <p class="text-xs text-gray-600 mt-1">Format: NO, PART, DESKRIPSI PART, QTY, QTY ALLOC</p>
+              <p class="text-xs text-yellow-400 mt-1">⚠️ Data akan ditimpa berdasarkan PART Number yang sama</p>
             </label>
           </div>
           <div class="flex flex-wrap gap-2">
@@ -240,10 +256,11 @@
         <div class="flex items-start gap-3">
           <svg class="w-5 h-5 text-yellow-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           <div class="text-sm">
-            <p class="text-yellow-400 font-medium mb-1">Info Realtime</p>
+            <p class="text-yellow-400 font-medium mb-1">Info Realtime & Deduplikasi</p>
             <ol class="text-gray-400 space-y-1 list-decimal list-inside">
               <li>Data tersinkron <strong>REALTIME</strong> dengan Firebase - semua perubahan langsung terlihat</li>
-              <li>Upload Excel atau data dari Firebase otomatis tersimpan di cloud</li>
+              <li><strong>DEDUPLIKASI OTOMATIS:</strong> Data dengan PART Number yang sama akan ditimpa dengan data terbaru</li>
+              <li>Upload Excel atau data dari Firebase otomatis tersimpan di cloud tanpa duplikat</li>
               <li>Setiap scan barcode atau edit, data langsung terupdate di semua perangkat</li>
             </ol>
           </div>
@@ -427,7 +444,6 @@
     function handleLogout() {
       if (!confirm('Yakin ingin logout?')) return;
       localStorage.removeItem('stockOpnameLoggedIn');
-      // Detach realtime listener
       if (unsubscribeListener) {
         unsubscribeListener();
         unsubscribeListener = null;
@@ -439,7 +455,6 @@
       document.getElementById('loginPage').classList.add('hidden');
       document.getElementById('mainApp').classList.remove('hidden');
       testConnection();
-      // Start realtime listener
       startRealtimeListener();
     }
 
@@ -452,7 +467,7 @@
     }
 
     // =============================================
-    // REALTIME FIRESTORE LISTENER
+    // REALTIME FIRESTORE LISTENER WITH DEDUPLICATION
     // =============================================
     function startRealtimeListener() {
       if (unsubscribeListener) {
@@ -463,12 +478,11 @@
       updateConnectionStatus('loading', 'Menyambungkan realtime...');
       
       try {
-        // Listen for realtime changes on the collection
+        // Listen for realtime changes
         unsubscribeListener = db.collection(COLLECTION_NAME)
           .orderBy('no', 'asc')
           .onSnapshot((snapshot) => {
             if (snapshot.empty && isInitialLoad) {
-              // No data yet, show empty state
               stockData = [];
               filteredData = [];
               renderTable();
@@ -481,8 +495,10 @@
 
             isInitialLoad = false;
             
-            // Process snapshot changes
-            const newData = [];
+            // Process snapshot with deduplication
+            const docMap = new Map();
+            const changedDocs = [];
+            
             snapshot.docChanges().forEach(change => {
               const doc = change.doc;
               const data = doc.data();
@@ -498,23 +514,23 @@
                 selisih: data.selisih !== undefined && data.selisih !== null ? data.selisih : null
               };
               
+              // Store by part number for deduplication
+              const key = item.part.toLowerCase().trim();
+              
               if (change.type === 'removed') {
-                // Remove from local data
-                const idx = stockData.findIndex(d => d.id === doc.id);
-                if (idx !== -1) {
-                  stockData.splice(idx, 1);
-                }
+                // Remove from map
+                docMap.delete(key);
               } else {
-                // Add or update
-                const existingIdx = stockData.findIndex(d => d.id === doc.id);
-                if (existingIdx !== -1) {
-                  stockData[existingIdx] = item;
-                } else {
-                  stockData.push(item);
-                }
+                // Add or update - the latest one wins
+                docMap.set(key, item);
               }
+              
+              changedDocs.push({ type: change.type, item });
             });
 
+            // Rebuild stockData from map (deduplicated)
+            stockData = Array.from(docMap.values());
+            
             // Sort by 'no'
             stockData.sort((a, b) => a.no - b.no);
             
@@ -525,12 +541,11 @@
             updateButtons(stockData.length > 0);
             updateConnectionStatus('connected', `Terhubung — ${stockData.length} items (Realtime)`);
             
-            // Show toast for realtime updates (not on initial load)
-            if (snapshot.docChanges().length > 0 && !isInitialLoad) {
-              const changes = snapshot.docChanges();
-              const added = changes.filter(c => c.type === 'added').length;
-              const modified = changes.filter(c => c.type === 'modified').length;
-              const removed = changes.filter(c => c.type === 'removed').length;
+            // Show toast for changes
+            if (changedDocs.length > 0 && !isInitialLoad) {
+              const added = changedDocs.filter(c => c.type === 'added').length;
+              const modified = changedDocs.filter(c => c.type === 'modified').length;
+              const removed = changedDocs.filter(c => c.type === 'removed').length;
               
               if (added > 0 || modified > 0 || removed > 0) {
                 let msg = 'Data diperbarui secara realtime';
@@ -553,6 +568,216 @@
       } catch (e) {
         console.error('Error starting listener:', e);
         updateConnectionStatus('disconnected', 'Gagal memulai realtime');
+      }
+    }
+
+    // =============================================
+    // DEDUPLICATION HELPER FUNCTIONS
+    // =============================================
+    async function saveItemWithDeduplication(item) {
+      if (!item.part) {
+        showToast('Part Number tidak boleh kosong', 'error');
+        return false;
+      }
+
+      try {
+        // Search for existing document with same PART
+        const querySnapshot = await db.collection(COLLECTION_NAME)
+          .where('part', '==', item.part)
+          .get();
+
+        const data = {
+          no: item.no || 0,
+          part: item.part,
+          deskripsi: item.deskripsi || '',
+          qty: item.qty || 0,
+          qtyAlloc: item.qtyAlloc || 0,
+          fisik: item.fisik !== undefined ? item.fisik : null,
+          selisih: item.selisih !== undefined ? item.selisih : null
+        };
+
+        if (!querySnapshot.empty) {
+          // Update existing document
+          const docId = querySnapshot.docs[0].id;
+          await db.collection(COLLECTION_NAME).doc(docId).set(data, { merge: true });
+          item.id = docId;
+          showToast(`Data "${item.part}" diperbarui (ditimpa)`, 'info');
+        } else {
+          // Create new document
+          const docRef = await db.collection(COLLECTION_NAME).add(data);
+          item.id = docRef.id;
+          showToast(`Data "${item.part}" baru ditambahkan`, 'success');
+        }
+        return true;
+      } catch (e) {
+        console.error('Save error:', e);
+        showToast('Gagal menyimpan data: ' + e.message, 'error');
+        return false;
+      }
+    }
+
+    async function syncToFirebase() {
+      if (!stockData.length) { 
+        showToast('Tidak ada data untuk diupload', 'info'); 
+        return; 
+      }
+      if (!confirm('Upload semua data ke Firebase? Data dengan PART yang sama akan ditimpa.')) return;
+      
+      showToast('Mengupload ke Firebase (deduplikasi aktif)...', 'info');
+      let success = 0, failed = 0, updated = 0, added = 0;
+      
+      for (const item of stockData) {
+        try {
+          // Check if PART already exists
+          const querySnapshot = await db.collection(COLLECTION_NAME)
+            .where('part', '==', item.part)
+            .get();
+
+          const data = {
+            no: item.no,
+            part: item.part,
+            deskripsi: item.deskripsi,
+            qty: item.qty,
+            qtyAlloc: item.qtyAlloc,
+            fisik: item.fisik !== undefined ? item.fisik : null,
+            selisih: item.selisih !== undefined ? item.selisih : null
+          };
+
+          if (!querySnapshot.empty) {
+            // Update existing
+            const docId = querySnapshot.docs[0].id;
+            await db.collection(COLLECTION_NAME).doc(docId).set(data, { merge: true });
+            item.id = docId;
+            updated++;
+          } else {
+            // Create new
+            const docRef = await db.collection(COLLECTION_NAME).add(data);
+            item.id = docRef.id;
+            added++;
+          }
+          success++;
+        } catch (e) {
+          console.error('Upload error for item:', item.part, e);
+          failed++;
+        }
+      }
+      
+      showToast(`Upload selesai: ${success} berhasil (${added} baru, ${updated} ditimpa), ${failed} gagal`, 
+        failed === 0 ? 'success' : 'error');
+    }
+
+    async function resetFisikData() {
+      if (!stockData.length) { showToast('Tidak ada data', 'info'); return; }
+      if (!confirm('Reset FISIK & SELISIH di Firebase?')) return;
+      
+      showToast('Merreset data...', 'info');
+      let success = 0, failed = 0;
+      
+      for (const item of stockData) {
+        if (!item.id) continue;
+        try {
+          await db.collection(COLLECTION_NAME).doc(item.id).update({
+            fisik: null,
+            selisih: null
+          });
+          success++;
+        } catch (e) {
+          failed++;
+        }
+      }
+      
+      showToast(`Reset: ${success} berhasil, ${failed} gagal`, success > 0 ? 'success' : 'error');
+    }
+
+    async function cleanDuplicates() {
+      if (!stockData.length) { showToast('Tidak ada data', 'info'); return; }
+      if (!confirm('Bersihkan data duplikat di Firebase? Data dengan PART yang sama akan digabung.')) return;
+      
+      showToast('Membersihkan duplikat...', 'info');
+      
+      try {
+        // Get all documents
+        const snapshot = await db.collection(COLLECTION_NAME).get();
+        const partMap = new Map();
+        const duplicateIds = [];
+        
+        // Find duplicates
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const part = data.part;
+          if (part) {
+            const key = part.toLowerCase().trim();
+            if (partMap.has(key)) {
+              // This is a duplicate - mark for deletion
+              duplicateIds.push(doc.id);
+            } else {
+              partMap.set(key, doc.id);
+            }
+          }
+        });
+        
+        if (duplicateIds.length === 0) {
+          showToast('Tidak ada data duplikat ditemukan', 'success');
+          return;
+        }
+        
+        // Delete duplicates
+        let deleted = 0;
+        for (const id of duplicateIds) {
+          try {
+            await db.collection(COLLECTION_NAME).doc(id).delete();
+            deleted++;
+          } catch (e) {
+            console.error('Delete error:', e);
+          }
+        }
+        
+        showToast(`Berhasil menghapus ${deleted} data duplikat`, 'success');
+        
+      } catch (e) {
+        console.error('Clean duplicates error:', e);
+        showToast('Gagal membersihkan duplikat: ' + e.message, 'error');
+      }
+    }
+
+    // =============================================
+    // UPDATE FUNCTIONS WITH DEDUPLICATION
+    // =============================================
+    async function updateFisikInFirebase(docId, fisik, part) {
+      try {
+        // If we have docId, update directly
+        if (docId) {
+          const item = stockData.find(d => d.id === docId);
+          const selisih = item ? fisik - item.available : 0;
+          await db.collection(COLLECTION_NAME).doc(docId).update({
+            fisik: fisik,
+            selisih: selisih
+          });
+          return true;
+        }
+        
+        // Otherwise, find by PART number
+        if (part) {
+          const querySnapshot = await db.collection(COLLECTION_NAME)
+            .where('part', '==', part)
+            .get();
+          
+          if (!querySnapshot.empty) {
+            const docId2 = querySnapshot.docs[0].id;
+            const data = querySnapshot.docs[0].data();
+            const available = (data.qty || 0) - (data.qtyAlloc || 0);
+            await db.collection(COLLECTION_NAME).doc(docId2).update({
+              fisik: fisik,
+              selisih: fisik - available
+            });
+            return true;
+          }
+        }
+        
+        return false;
+      } catch (e) {
+        console.error('Update error:', e);
+        return false;
       }
     }
 
@@ -592,91 +817,6 @@
     }
 
     // =============================================
-    // FIREBASE WRITE OPERATIONS
-    // =============================================
-    async function updateFisikInFirebase(docId, fisik) {
-      if (!docId) return false;
-      try {
-        const item = stockData.find(d => d.id === docId);
-        const selisih = item ? fisik - item.available : 0;
-        
-        await db.collection(COLLECTION_NAME).doc(docId).update({
-          fisik: fisik,
-          selisih: selisih
-        });
-        return true;
-      } catch (e) {
-        console.error('Update error:', e);
-        return false;
-      }
-    }
-
-    async function syncToFirebase() {
-      if (!stockData.length) { 
-        showToast('Tidak ada data untuk diupload', 'info'); 
-        return; 
-      }
-      if (!confirm('Upload semua data ke Firebase? Data yang sama akan ditimpa.')) return;
-      
-      showToast('Mengupload ke Firebase...', 'info');
-      let success = 0, failed = 0;
-      
-      for (const item of stockData) {
-        try {
-          const data = {
-            no: item.no,
-            part: item.part,
-            deskripsi: item.deskripsi,
-            qty: item.qty,
-            qtyAlloc: item.qtyAlloc,
-            fisik: item.fisik !== undefined ? item.fisik : null,
-            selisih: item.selisih !== undefined ? item.selisih : null
-          };
-          
-          if (item.id) {
-            await db.collection(COLLECTION_NAME).doc(item.id).set(data, { merge: true });
-          } else {
-            const docRef = await db.collection(COLLECTION_NAME).add(data);
-            item.id = docRef.id;
-          }
-          success++;
-        } catch (e) {
-          console.error('Upload error for item:', item.part, e);
-          failed++;
-        }
-      }
-      
-      if (failed === 0) {
-        showToast(`Berhasil mengupload ${success} item ke Firebase`, 'success');
-      } else {
-        showToast(`Upload: ${success} berhasil, ${failed} gagal`, 'error');
-      }
-    }
-
-    async function resetFisikData() {
-      if (!stockData.length) { showToast('Tidak ada data', 'info'); return; }
-      if (!confirm('Reset FISIK & SELISIH di Firebase?')) return;
-      
-      showToast('Merreset data...', 'info');
-      let success = 0, failed = 0;
-      
-      for (const item of stockData) {
-        if (!item.id) continue;
-        try {
-          await db.collection(COLLECTION_NAME).doc(item.id).update({
-            fisik: null,
-            selisih: null
-          });
-          success++;
-        } catch (e) {
-          failed++;
-        }
-      }
-      
-      showToast(`Reset: ${success} berhasil, ${failed} gagal`, success > 0 ? 'success' : 'error');
-    }
-
-    // =============================================
     // AUDIO
     // =============================================
     function initAudio() { try { audioContext = new (window.AudioContext || window.webkitAudioContext)(); } catch {} } 
@@ -707,7 +847,7 @@
         t.style.transform = 'translateX(100%)'; 
         t.style.transition = 'all 0.3s ease'; 
         setTimeout(() => t.remove(), 300); 
-      }, 3500); 
+      }, 4000); 
     }
 
     // =============================================
@@ -723,7 +863,7 @@
     
     function processFile(file) { 
       const reader = new FileReader(); 
-      reader.onload = e => { 
+      reader.onload = async e => { 
         try { 
           const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' }); 
           const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 }); 
@@ -747,17 +887,21 @@
           } 
           if (!newData.length) { showToast('Tidak ada data valid', 'error'); return; } 
           
-          // Replace local data and sync to Firebase
-          stockData = newData;
-          filteredData = [...stockData];
-          renderTable();
-          updateStats();
-          updateButtons(true);
-          showToast(`${stockData.length} item dimuat dari Excel`, 'success'); 
+          showToast(`${newData.length} item dibaca dari Excel, menyimpan ke Firebase...`, 'info');
           
-          if (isFirebaseConnected) { 
-            syncToFirebase(); 
+          // Save each item with deduplication
+          let saved = 0, failed = 0;
+          for (const item of newData) {
+            const success = await saveItemWithDeduplication(item);
+            if (success) {
+              saved++;
+            } else {
+              failed++;
+            }
           }
+          
+          showToast(`Selesai: ${saved} berhasil, ${failed} gagal`, failed === 0 ? 'success' : 'error');
+          
         } catch (err) { 
           console.error(err); 
           showToast('Gagal membaca Excel', 'error'); 
@@ -903,11 +1047,12 @@
       item.fisik = (item.fisik || 0) + 1; 
       item.selisih = item.fisik - item.available; 
       
-      if (item.id) {
-        await updateFisikInFirebase(item.id, item.fisik);
-      } else {
-        // If no ID, try to sync the whole item
-        await syncToFirebase();
+      // Update to Firebase (will handle deduplication)
+      const success = await updateFisikInFirebase(item.id, item.fisik, item.part);
+      
+      if (!success) {
+        // If update failed, try full save with deduplication
+        await saveItemWithDeduplication(item);
       }
       
       document.getElementById('scanSuccess').classList.remove('hidden'); 
@@ -977,8 +1122,11 @@
       item.fisik = qty; 
       item.selisih = qty - item.available; 
       
-      if (item.id) {
-        await updateFisikInFirebase(item.id, qty);
+      // Update to Firebase with deduplication
+      const success = await updateFisikInFirebase(item.id, qty, item.part);
+      
+      if (!success) {
+        await saveItemWithDeduplication(item);
       }
       
       document.getElementById('searchInput').value = pn; 
@@ -1025,8 +1173,12 @@
       item.fisik = val === '' ? null : parseInt(val) || 0; 
       item.selisih = item.fisik !== null ? item.fisik - item.available : null; 
       
-      if (docId) {
-        await updateFisikInFirebase(docId, item.fisik);
+      // Update to Firebase with deduplication
+      const success = await updateFisikInFirebase(docId, item.fisik, item.part);
+      
+      if (!success && docId) {
+        // Try save with deduplication
+        await saveItemWithDeduplication(item);
       }
       
       document.getElementById('searchInput').value = item.part; 
