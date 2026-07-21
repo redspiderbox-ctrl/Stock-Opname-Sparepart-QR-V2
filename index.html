@@ -10,6 +10,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
@@ -68,6 +69,8 @@
     .info-panel { display: none !important; }
     .main-container { padding-bottom: 0 !important; }
     #tableWrapper { max-height: 72vh !important; }
+    .login-loading { display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(10,10,11,0.3); border-radius: 50%; border-top-color: var(--bg); animation: spin 0.6s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
     @media (max-width: 768px) { .hide-mobile { display: none; } th, td { padding: 10px 12px; font-size: 13px; } .modal-content { padding: 16px; } #tableWrapper { max-height: 65vh !important; } }
   </style>
@@ -82,13 +85,13 @@
           <svg class="w-8 h-8 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
         </div>
         <h1 class="text-2xl font-bold">Stock Opname</h1>
-        <p class="text-gray-500 text-sm mt-1">Silakan login untuk melanjutkan</p>
+        <p class="text-gray-500 text-sm mt-1">Login dengan akun Firebase</p>
       </div>
 
       <form id="loginForm" onsubmit="handleLogin(event)">
         <div class="mb-5">
-          <label class="block text-sm text-gray-400 mb-2 font-medium">Username</label>
-          <input type="text" id="loginUsername" class="input text-lg" placeholder="Masukkan username" required autocomplete="username">
+          <label class="block text-sm text-gray-400 mb-2 font-medium">Email</label>
+          <input type="email" id="loginEmail" class="input text-lg" placeholder="Masukkan email" required autocomplete="email">
         </div>
 
         <div class="mb-6">
@@ -97,14 +100,45 @@
         </div>
 
         <div id="loginError" class="hidden mb-4 p-3 rounded-lg bg-red-900/30 border border-red-500/40 text-red-400 text-sm text-center">
-          Username atau password salah!
+          Login gagal! Periksa email dan password Anda.
         </div>
 
-        <button type="submit" class="btn btn-primary w-full text-lg py-3">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
-          Login
+        <button type="submit" id="loginBtn" class="btn btn-primary w-full text-lg py-3">
+          <span id="loginBtnText">Login</span>
+          <span id="loginBtnLoading" class="hidden"><span class="login-loading"></span></span>
         </button>
+        
+        <div class="mt-4 text-center">
+          <button type="button" onclick="showRegister()" class="text-sm text-gray-400 hover:text-yellow-400 transition-colors">
+            Belum punya akun? Daftar
+          </button>
+        </div>
       </form>
+
+      <!-- Register Form -->
+      <div id="registerForm" class="hidden mt-6 border-t border-gray-700 pt-6">
+        <h2 class="text-lg font-semibold mb-4 text-center">Daftar Akun Baru</h2>
+        <form onsubmit="handleRegister(event)">
+          <div class="mb-4">
+            <label class="block text-sm text-gray-400 mb-2 font-medium">Email</label>
+            <input type="email" id="registerEmail" class="input text-lg" placeholder="Masukkan email" required>
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm text-gray-400 mb-2 font-medium">Password</label>
+            <input type="password" id="registerPassword" class="input text-lg" placeholder="Minimal 6 karakter" required minlength="6">
+          </div>
+          <div id="registerError" class="hidden mb-4 p-3 rounded-lg bg-red-900/30 border border-red-500/40 text-red-400 text-sm text-center"></div>
+          <button type="submit" id="registerBtn" class="btn btn-primary w-full text-lg py-3">
+            <span id="registerBtnText">Daftar</span>
+            <span id="registerBtnLoading" class="hidden"><span class="login-loading"></span></span>
+          </button>
+          <div class="mt-3 text-center">
+            <button type="button" onclick="showLoginForm()" class="text-sm text-gray-400 hover:text-yellow-400 transition-colors">
+              Kembali ke Login
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 
@@ -122,6 +156,7 @@
               <div class="flex items-center gap-2 text-xs">
                 <span class="status-dot disconnected" id="statusDot"></span>
                 <span class="text-gray-500" id="statusText">Memuat...</span>
+                <span class="text-gray-600 ml-2" id="userEmail"></span>
               </div>
             </div>
           </div>
@@ -182,11 +217,8 @@
     };
 
     // =============================================
-    // STATE & CREDENTIALS
+    // STATE
     // =============================================
-    const VALID_USERNAME = 'admin';
-    const VALID_PASSWORD = '@admin1234';
-
     let stockData = []; 
     let filteredData = []; 
     let html5QrCode = null; 
@@ -198,11 +230,13 @@
     let volume = 0.7;
     let firebaseApp = null;
     let firebaseDb = null;
+    let firebaseAuth = null;
     let isFirebaseConnected = false;
     let isRealtimeActive = false;
     let realtimeListener = null;
     let isLocalUpdate = false;
     let lastUpdateTime = 0;
+    let currentUser = null;
 
     // =============================================
     // FIREBASE INIT - OTOMATIS
@@ -211,12 +245,22 @@
       try {
         firebaseApp = firebase.initializeApp(firebaseConfig);
         firebaseDb = firebase.database();
+        firebaseAuth = firebase.auth();
         isFirebaseConnected = true;
-        updateConnectionStatus('connected', 'Terhubung ke Firebase');
-        // Auto start realtime
-        startRealtimeListener();
-        // Load data otomatis
-        loadDataFromFirebase();
+        
+        // Listen for auth state changes
+        firebaseAuth.onAuthStateChanged(user => {
+          if (user) {
+            currentUser = user;
+            document.getElementById('userEmail').textContent = user.email;
+            showApp();
+          } else {
+            currentUser = null;
+            document.getElementById('userEmail').textContent = '';
+            showLogin();
+          }
+        });
+        
         return true;
       } catch (e) {
         console.error('Firebase init error:', e);
@@ -226,15 +270,164 @@
     }
 
     function updateConnectionStatus(status, text) {
-      document.getElementById('statusDot').className = 'status-dot ' + status;
-      document.getElementById('statusText').textContent = text;
+      const dot = document.getElementById('statusDot');
+      if (dot) {
+        dot.className = 'status-dot ' + status;
+        document.getElementById('statusText').textContent = text;
+      }
+    }
+
+    // =============================================
+    // AUTHENTICATION
+    // =============================================
+    function handleLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      const btn = document.getElementById('loginBtn');
+      const btnText = document.getElementById('loginBtnText');
+      const btnLoading = document.getElementById('loginBtnLoading');
+      const errorEl = document.getElementById('loginError');
+
+      // Show loading
+      btn.disabled = true;
+      btnText.textContent = 'Memproses...';
+      btnLoading.classList.remove('hidden');
+      errorEl.classList.add('hidden');
+
+      firebaseAuth.signInWithEmailAndPassword(email, password)
+        .then(() => {
+          // Success - auth state listener will handle navigation
+          showToast('Login berhasil!', 'success');
+        })
+        .catch((error) => {
+          console.error('Login error:', error);
+          let msg = 'Login gagal! ';
+          switch (error.code) {
+            case 'auth/user-not-found':
+              msg += 'Email tidak terdaftar.';
+              break;
+            case 'auth/wrong-password':
+              msg += 'Password salah.';
+              break;
+            case 'auth/invalid-email':
+              msg += 'Format email tidak valid.';
+              break;
+            case 'auth/too-many-requests':
+              msg += 'Terlalu banyak percobaan. Coba lagi nanti.';
+              break;
+            default:
+              msg += error.message;
+          }
+          errorEl.textContent = msg;
+          errorEl.classList.remove('hidden');
+          showToast(msg, 'error');
+        })
+        .finally(() => {
+          btn.disabled = false;
+          btnText.textContent = 'Login';
+          btnLoading.classList.add('hidden');
+        });
+    }
+
+    function handleRegister(e) {
+      e.preventDefault();
+      const email = document.getElementById('registerEmail').value;
+      const password = document.getElementById('registerPassword').value;
+      const btn = document.getElementById('registerBtn');
+      const btnText = document.getElementById('registerBtnText');
+      const btnLoading = document.getElementById('registerBtnLoading');
+      const errorEl = document.getElementById('registerError');
+
+      // Show loading
+      btn.disabled = true;
+      btnText.textContent = 'Memproses...';
+      btnLoading.classList.remove('hidden');
+      errorEl.classList.add('hidden');
+
+      firebaseAuth.createUserWithEmailAndPassword(email, password)
+        .then(() => {
+          showToast('Registrasi berhasil! Silakan login.', 'success');
+          showLoginForm();
+        })
+        .catch((error) => {
+          console.error('Register error:', error);
+          let msg = 'Registrasi gagal! ';
+          switch (error.code) {
+            case 'auth/email-already-in-use':
+              msg += 'Email sudah terdaftar.';
+              break;
+            case 'auth/invalid-email':
+              msg += 'Format email tidak valid.';
+              break;
+            case 'auth/weak-password':
+              msg += 'Password minimal 6 karakter.';
+              break;
+            default:
+              msg += error.message;
+          }
+          errorEl.textContent = msg;
+          errorEl.classList.remove('hidden');
+          showToast(msg, 'error');
+        })
+        .finally(() => {
+          btn.disabled = false;
+          btnText.textContent = 'Daftar';
+          btnLoading.classList.add('hidden');
+        });
+    }
+
+    function showRegister() {
+      document.getElementById('loginForm').classList.add('hidden');
+      document.getElementById('registerForm').classList.remove('hidden');
+    }
+
+    function showLoginForm() {
+      document.getElementById('loginForm').classList.remove('hidden');
+      document.getElementById('registerForm').classList.add('hidden');
+      document.getElementById('loginError').classList.add('hidden');
+      document.getElementById('registerError').classList.add('hidden');
+    }
+
+    function checkLoginStatus() {
+      // Will be handled by onAuthStateChanged
+    }
+
+    function handleLogout() {
+      if (!confirm('Yakin ingin logout?')) return;
+      stopRealtimeListener();
+      firebaseAuth.signOut().then(() => {
+        showToast('Logout berhasil', 'info');
+        showLogin();
+      }).catch((error) => {
+        console.error('Logout error:', error);
+        showToast('Gagal logout', 'error');
+      });
+    }
+
+    function showApp() {
+      document.getElementById('loginPage').classList.add('hidden');
+      document.getElementById('mainApp').classList.remove('hidden');
+      // Initialize data after login
+      startRealtimeListener();
+      loadDataFromFirebase();
+    }
+
+    function showLogin() {
+      document.getElementById('loginPage').classList.remove('hidden');
+      document.getElementById('mainApp').classList.add('hidden');
+      document.getElementById('loginEmail').value = '';
+      document.getElementById('loginPassword').value = '';
+      document.getElementById('loginError').classList.add('hidden');
+      document.getElementById('loginForm').classList.remove('hidden');
+      document.getElementById('registerForm').classList.add('hidden');
     }
 
     // =============================================
     // REALTIME LISTENER - OTOMATIS
     // =============================================
     function startRealtimeListener() {
-      if (realtimeListener || !firebaseDb) return;
+      if (realtimeListener || !firebaseDb || !currentUser) return;
       
       try {
         realtimeListener = firebaseDb.ref('stockData').on('value', (snapshot) => {
@@ -486,53 +679,6 @@
     }
 
     // =============================================
-    // AUTHENTICATION
-    // =============================================
-    function checkLoginStatus() {
-      const isLogged = localStorage.getItem('stockOpnameLoggedIn');
-      if (isLogged === 'true') {
-        showApp();
-      } else {
-        showLogin();
-      }
-    }
-
-    function handleLogin(e) {
-      e.preventDefault();
-      const username = document.getElementById('loginUsername').value;
-      const password = document.getElementById('loginPassword').value;
-
-      if (username === VALID_USERNAME && password === VALID_PASSWORD) {
-        localStorage.setItem('stockOpnameLoggedIn', 'true');
-        showApp();
-      } else {
-        document.getElementById('loginError').classList.remove('hidden');
-        setTimeout(() => document.getElementById('loginError').classList.add('hidden'), 3000);
-      }
-    }
-
-    function handleLogout() {
-      if (!confirm('Yakin ingin logout?')) return;
-      stopRealtimeListener();
-      localStorage.removeItem('stockOpnameLoggedIn');
-      showLogin();
-    }
-
-    function showApp() {
-      document.getElementById('loginPage').classList.add('hidden');
-      document.getElementById('mainApp').classList.remove('hidden');
-      initFirebase();
-    }
-
-    function showLogin() {
-      document.getElementById('loginPage').classList.remove('hidden');
-      document.getElementById('mainApp').classList.add('hidden');
-      document.getElementById('loginUsername').value = '';
-      document.getElementById('loginPassword').value = '';
-      document.getElementById('loginError').classList.add('hidden');
-    }
-
-    // =============================================
     // AUDIO
     // =============================================
     function initAudio() { 
@@ -568,6 +714,7 @@
     // =============================================
     function showToast(msg, type = 'info') { 
       const c = document.getElementById('toastContainer'), t = document.createElement('div'); 
+      if (!c) return;
       t.className = `toast toast-${type}`; 
       const icons = { success: '<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>', error: '<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>', info: '<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>' }; 
       t.innerHTML = `${icons[type] || icons.info}<span>${msg}</span>`; 
@@ -580,6 +727,7 @@
     // =============================================
     function setupFileUpload() { 
       const dz = document.getElementById('dropZone'), fi = document.getElementById('fileInput'); 
+      if (!dz) return;
       dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); }); 
       dz.addEventListener('dragleave', () => dz.classList.remove('dragover')); 
       dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('dragover'); if (e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]); }); 
@@ -626,6 +774,7 @@
 
     function renderTable() { 
       const tbody = document.getElementById('tableBody'); 
+      if (!tbody) return;
       if (!filteredData.length) { 
         tbody.innerHTML = `<tr><td colspan="9" class="text-center py-12"><svg class="w-12 h-12 mx-auto mb-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><p class="text-gray-500">${stockData.length ? 'Tidak ada hasil' : 'Belum ada data'}</p></td></tr>`; 
         return; 
@@ -743,6 +892,7 @@
 
     function setupManualInput() { 
       const bi = document.getElementById('barcodeInput'); 
+      if (!bi) return;
       bi.addEventListener('input', e => { 
         const v = e.target.value.trim(); 
         if (v.length >= 2) { 
@@ -885,7 +1035,7 @@
     // INIT
     // =============================================
     document.addEventListener('DOMContentLoaded', () => { 
-      checkLoginStatus();
+      initFirebase();
       setupFileUpload(); 
       setupManualInput(); 
       initAudio(); 
